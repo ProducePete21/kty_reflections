@@ -32,6 +32,9 @@ const ReflectionsCalculator = () => {
 
 
     useEffect(() => {
+        // pulls all transaction info about KTY from BSC Scan
+        // We're limited to 10000 transactions per call. KTY has more than 10000 transactions so we'll need to figure out how to make a second call starting
+        // from where the first call ended. 
         const fetchingData = async () => {
             try {
                 fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&page=1&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
@@ -65,58 +68,59 @@ const ReflectionsCalculator = () => {
         console.log(formData);
     }
 
+    // main logic for reflections
     const calculateReflections = (personalKtyAddress) => {
         let totalSupply = 69420000000000;
         let personalKtyAmount = 0;
-        let reflectionsForDesiredDay = 0;
+        let reflectionsForChosenDay = 0;
 
-        trxData.result.forEach(el => {
-          if(el.to.startsWith('0x000000000000000000000000000') && el.value !== 0) {
-                totalSupply = totalSupply - (el.value * decimalConst);
-          } else if(el.to.startsWith(personalKtyAddress.toLowerCase())) {
-                personalKtyAmount = personalKtyAmount + (el.value * decimalConst);
-                console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
-                console.log(`Timestamp: ${el.timeStamp}`);
-          } else if(el.value !== 0 && !el.to.startsWith('0x000000000000000000000') && !el.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !el.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
-                const ownershipPercentage = personalKtyAmount / totalSupply;
-        
-                console.log(`Total Supply: ${totalSupply.toFixed(9)}`);
-                console.log(`% owned: ${ownershipPercentage.toFixed(9)}`);
-        
-                const elementReflection = ((el.value * decimalConst) * 0.03) * ownershipPercentage;
-        
-                // console.log(`Reflection: ${elementReflection}`);
-        
-                personalKtyAmount = personalKtyAmount + elementReflection;
-        
-                // console.log(`KTY after: ${personalKtyAmount}`);
-        
-                /* reflectionsForDesiredDay = reflectionsForDesiredDay + elementReflection; */
-                
-                const elementDate = new Date(el.timeStamp * timeStampConst);
-        
-                if(elementDate.getUTCMonth() === formData.date.getUTCMonth() && elementDate.getUTCDate() === formData.date.getUTCDate() && elementDate.getUTCFullYear() === formData.date.getUTCFullYear()) {
-                    reflectionsForDesiredDay = reflectionsForDesiredDay + elementReflection;
-                }
-          }
+        trxData.result.forEach(trx => {
+            // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply   
+            if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0) {
+                    totalSupply = totalSupply - (trx.value * decimalConst);
+            // Checks for trx sent to user's wallet and adds value to personalKtyAmount         
+            } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
+                    personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
+                    console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
+                    console.log(`Timestamp: ${trx.timeStamp}`);
+            // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
+            } else if(trx.from.startsWith(personalKtyAddress.toFixed(9))) {
+                    personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
+                    console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
+                    console.log(`Timestamp: ${trx.timeStamp}`);
+            // Checks for trx that is reflections eligible and runs reflections math
+            } else if(trx.value !== 0 && !trx.to.startsWith('0x000000000000000000000') && !trx.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !trx.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
+                    const ownershipPercentage = personalKtyAmount / totalSupply;
+            
+                    console.log(`Total Supply: ${totalSupply.toFixed(9)}`);
+                    console.log(`% owned: ${ownershipPercentage.toFixed(9)}`);
+            
+                    const elementReflection = ((trx.value * decimalConst) * 0.03) * ownershipPercentage;
+            
+                    personalKtyAmount = personalKtyAmount + elementReflection;
+                    
+                    const elementDate = new Date(trx.timeStamp * timeStampConst);
+
+                    // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
+                    if(elementDate.getUTCMonth() === formData.date.getUTCMonth() && elementDate.getUTCDate() === formData.date.getUTCDate() && elementDate.getUTCFullYear() === formData.date.getUTCFullYear()) {
+                        reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
+                    }
+            }
         })
         
-        console.log(`Reflections for Day: ${reflectionsForDesiredDay.toFixed(9)}`);
+        console.log(`Reflections for Day: ${reflectionsForChosenDay.toFixed(9)}`);
         console.log(`Current KTY: ${personalKtyAmount.toFixed(9)}`);
     }
 
     const handleButton = () => {
-        calculateReflections(formData.personalKtyAddress)
-
-        // setWarning(`The Button doesn't do anything yet!`);
-        // setShowDialog(true);
-        
+        calculateReflections(formData.personalKtyAddress)        
     }
 
     const closeDialog = () => {
         setShowDialog(false);
     }
-
+    
+    // A Div for displaying result of calculation. A leftover from previous app, not sure If I'm going to use it in this app yet.
     // const result = (
     //     <Grid container justifyContent='center'>
     //         <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
@@ -130,28 +134,23 @@ const ReflectionsCalculator = () => {
     //     </Grid>
     // );
 
-    const notABscAddress = (
-        <Grid container justifyContent='center'>
-            <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
-                <Typography>
-                    Check your entered values:
-                </Typography>
-                <Typography gutterBottom style={{paddingRight: '10px'}}>
-                    <ul>
-                        <li>All fields are required</li>
-                        <li>None of the fields can equal 0</li>
-                        <li>Fields can only contain numbers</li>
-                    </ul>
-                </Typography>
-                {/* <Typography align='center' gutterBottom>
-                    None of the fields can equal 0
-                </Typography>
-                <Typography align='center'>
-                    Fields can only contain numbers
-                </Typography> */}
-            </Card>
-        </Grid>
-    );
+    // A Div for displaying needed information if a user inputs wrong info. This is leftover from the previous AMP calc, not sure if I'll need this app yet.
+    // const notABscAddress = (
+    //     <Grid container justifyContent='center'>
+    //         <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
+    //             <Typography>
+    //                 Check your entered values:
+    //             </Typography>
+    //             <Typography gutterBottom style={{paddingRight: '10px'}}>
+    //                 <ul>
+    //                     <li>All fields are required</li>
+    //                     <li>None of the fields can equal 0</li>
+    //                     <li>Fields can only contain numbers</li>
+    //                 </ul>
+    //             </Typography>
+    //         </Card>
+    //     </Grid>
+    // );
 
     return(
         <div>
