@@ -84,7 +84,7 @@ const ReflectionsCalculator = () => {
                     console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
                     console.log(`Timestamp: ${trx.timeStamp}`);
             // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
-            } else if(trx.from.startsWith(personalKtyAddress.toFixed(9))) {
+            } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
                     personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
                     console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
                     console.log(`Timestamp: ${trx.timeStamp}`);
