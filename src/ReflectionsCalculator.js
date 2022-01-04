@@ -19,7 +19,8 @@ const timeStampConst = 1000;
 
 const ReflectionsCalculator = () => {
     const [formData, setFormData] = useState(initialState);
-    const [trxData, setTrxData] = useState(null);
+    const [trxData, setTrxData] = useState([]);
+    const [trxData2, setTrxData2] = useState([]);
     const [trxDataLoaded, setTrxDataLoaded] = useState(false);
     const [totalSupply, setTotalSupply] = useState(69420000000000);
     const [totalReflections, setTotalReflections] = useState(0);
@@ -32,24 +33,31 @@ const ReflectionsCalculator = () => {
 
 
     useEffect(() => {
+        let blockNum;
         // pulls all transaction info about KTY from BSC Scan
-        // We're limited to 10000 transactions per call. KTY has more than 10000 transactions so we'll need to figure out how to make a second call starting
-        // from where the first call ended. 
         const fetchingData = async () => {
-            try {
-                fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&page=1&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
+            await fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&startblock=0&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
                 .then(res => res.json())
                 .then(data => {
-                    setTrxData(data);
+                    console.log(data.result);
+                    setTrxData(data.result);
+                    blockNum = data.result[9999].blockNumber;
+                })
+                .catch(error => console.log(error));
+
+            // second call to API for transactions after the first 10000. This is a temp solution as it's little verbose and will not work once trx 
+            // are more than 20000 
+            await fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&startblock=${blockNum}&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
+                .then(res => res.json())
+                .then(data => {
+                    setTrxData2(data.result);
                     setTrxDataLoaded(true);
                 })
                 .catch(error => console.log(error));
-            } catch(error) {
-                console.log(error)
-            }
         }
 
         fetchingData();
+
     }, [])
 
     const handleChange = ({target}) => {
@@ -74,42 +82,44 @@ const ReflectionsCalculator = () => {
         let personalKtyAmount = 0;
         let reflectionsForChosenDay = 0;
 
-        trxData.result.forEach(trx => {
-            // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply   
-            if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0) {
-                    totalSupply = totalSupply - (trx.value * decimalConst);
-            // Checks for trx sent to user's wallet and adds value to personalKtyAmount         
-            } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
-                    personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
-                    console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
-                    console.log(`Timestamp: ${trx.timeStamp}`);
-            // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
-            } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
-                    personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
-                    console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
-                    console.log(`Timestamp: ${trx.timeStamp}`);
-            // Checks for trx that is reflections eligible and runs reflections math
-            } else if(trx.value !== 0 && !trx.to.startsWith('0x000000000000000000000') && !trx.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !trx.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
-                    const ownershipPercentage = personalKtyAmount / totalSupply;
+        // trxData[1].forEach(trx => {
+        //     // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply   
+        //     if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0) {
+        //             totalSupply = totalSupply - (trx.value * decimalConst);
+        //     // Checks for trx sent to user's wallet and adds value to personalKtyAmount         
+        //     } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
+        //             personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
+        //             console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
+        //             console.log(`Timestamp: ${trx.timeStamp}`);
+        //     // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
+        //     } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
+        //             personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
+        //             console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
+        //             console.log(`Timestamp: ${trx.timeStamp}`);
+        //     // Checks for trx that is reflections eligible and runs reflections math
+        //     } else if(trx.value !== 0 && !trx.to.startsWith('0x000000000000000000000') && !trx.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !trx.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
+        //             const ownershipPercentage = personalKtyAmount / totalSupply;
             
-                    console.log(`Total Supply: ${totalSupply.toFixed(9)}`);
-                    console.log(`% owned: ${ownershipPercentage.toFixed(9)}`);
+        //             console.log(`Total Supply: ${totalSupply.toFixed(9)}`);
+        //             console.log(`% owned: ${ownershipPercentage.toFixed(9)}`);
             
-                    const elementReflection = ((trx.value * decimalConst) * 0.03) * ownershipPercentage;
+        //             const elementReflection = ((trx.value * decimalConst) * 0.03) * ownershipPercentage;
             
-                    personalKtyAmount = personalKtyAmount + elementReflection;
+        //             personalKtyAmount = personalKtyAmount + elementReflection;
                     
-                    const elementDate = new Date(trx.timeStamp * timeStampConst);
+        //             const elementDate = new Date(trx.timeStamp * timeStampConst);
 
-                    // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
-                    if(elementDate.getUTCMonth() === formData.date.getUTCMonth() && elementDate.getUTCDate() === formData.date.getUTCDate() && elementDate.getUTCFullYear() === formData.date.getUTCFullYear()) {
-                        reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
-                    }
-            }
-        })
+        //             // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
+        //             if(elementDate.getUTCMonth() === formData.date.getUTCMonth() && elementDate.getUTCDate() === formData.date.getUTCDate() && elementDate.getUTCFullYear() === formData.date.getUTCFullYear()) {
+        //                 reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
+        //             }
+        //     }
+        // })
         
-        console.log(`Reflections for Day: ${reflectionsForChosenDay.toFixed(9)}`);
-        console.log(`Current KTY: ${personalKtyAmount.toFixed(9)}`);
+        // console.log(`Reflections for Day: ${reflectionsForChosenDay.toFixed(9)}`);
+        // console.log(`Current KTY: ${personalKtyAmount.toFixed(9)}`);
+        console.log(trxData);
+        console.log(trxData2);
     }
 
     const handleButton = () => {
