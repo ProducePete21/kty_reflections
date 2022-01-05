@@ -85,44 +85,50 @@ const ReflectionsCalculator = () => {
         let totalSupply = 69420000000000;
         let personalKtyAmount = 0;
         let reflectionsForChosenDay = 0;
+        // +1 every loop to assure that my logic is counting the correct number of transactions
+        let TrxCount = 0;
 
-        // trxData[1].forEach(trx => {
-        //     // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply   
-        //     if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0) {
-        //             totalSupply = totalSupply - (trx.value * decimalConst);
-        //     // Checks for trx sent to user's wallet and adds value to personalKtyAmount         
-        //     } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
-        //             personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
-        //             console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
-        //             console.log(`Timestamp: ${trx.timeStamp}`);
-        //     // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
-        //     } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
-        //             personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
-        //             console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
-        //             console.log(`Timestamp: ${trx.timeStamp}`);
-        //     // Checks for trx that is reflections eligible and runs reflections math
-        //     } else if(trx.value !== 0 && !trx.to.startsWith('0x000000000000000000000') && !trx.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !trx.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
-        //             const ownershipPercentage = personalKtyAmount / totalSupply;
-            
-        //             console.log(`Total Supply: ${totalSupply.toFixed(9)}`);
-        //             console.log(`% owned: ${ownershipPercentage.toFixed(9)}`);
-            
-        //             const elementReflection = ((trx.value * decimalConst) * 0.03) * ownershipPercentage;
-            
-        //             personalKtyAmount = personalKtyAmount + elementReflection;
-                    
-        //             const elementDate = new Date(trx.timeStamp * timeStampConst);
+        // iterates through each set of 10000 transactions in order
+        allTrx.forEach(trxArray => {
+            trxArray.forEach(trx => {
+                // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply   
+                if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0) {
+                        totalSupply = totalSupply - (trx.value * decimalConst);
+                // Checks for trx sent to user's wallet and adds value to personalKtyAmount         
+                } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
+                        personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
+                        console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
+                        console.log(`Timestamp: ${trx.timeStamp}`);
+                // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
+                } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
+                        personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
+                        console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
+                        console.log(`Timestamp: ${trx.timeStamp}`);
+                // Checks for trx that is reflections eligible and runs reflections math
+                } else if(trx.value !== 0 && !trx.to.startsWith('0x000000000000000000000') && !trx.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !trx.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
+                        const ownershipPercentage = personalKtyAmount / totalSupply;
+                
+                        console.log(`Total Supply: ${totalSupply.toFixed(9)}`);
+                        console.log(`% owned: ${ownershipPercentage.toFixed(9)}`);
+                
+                        const elementReflection = ((trx.value * decimalConst) * 0.03) * ownershipPercentage;
+                
+                        personalKtyAmount = personalKtyAmount + elementReflection;
+                        
+                        const elementDate = new Date(trx.timeStamp * timeStampConst);
 
-        //             // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
-        //             if(elementDate.getUTCMonth() === formData.date.getUTCMonth() && elementDate.getUTCDate() === formData.date.getUTCDate() && elementDate.getUTCFullYear() === formData.date.getUTCFullYear()) {
-        //                 reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
-        //             }
-        //     }
-        // })
+                        // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
+                        if(elementDate.getUTCMonth() === formData.date.getUTCMonth() && elementDate.getUTCDate() === formData.date.getUTCDate() && elementDate.getUTCFullYear() === formData.date.getUTCFullYear()) {
+                            reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
+                        }
+                }
+                TrxCount++;
+        })})
         
-        // console.log(`Reflections for Day: ${reflectionsForChosenDay.toFixed(9)}`);
-        // console.log(`Current KTY: ${personalKtyAmount.toFixed(9)}`);
-        console.log(allTrx);
+        
+        console.log(`Reflections for Day: ${reflectionsForChosenDay.toFixed(9)}`);
+        console.log(`Current KTY: ${personalKtyAmount.toFixed(9)}`);
+        console.log(TrxCount);
     }
 
     const handleButton = () => {
