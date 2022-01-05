@@ -1,9 +1,9 @@
-<b>Math for Reflections:</b>
+<b>Perceived Math for Reflections:</b>
 
 I believe that the equation to determine a reflection for a particular transaction would be: 
 (transactionValue * 0.03) * userOwnershipPercentage.
 
-That’s 3% of whatever the amount of the transaction was times whatever the user’s personal percentage of ownership is. The ownership percentage would just be the current amount of owned KTY divided by the current total supply.
+That’s 3% of whatever the amount of the transaction was times whatever the user’s personal percentage of ownership is at the time. The ownership percentage would just be the current amount of owned KTY divided by the current total supply.
 
 The ownership percentage and the total supply change after every burn and every reflection eligible transaction. It would also change as user’s buy and sell KTY.
 
@@ -29,10 +29,21 @@ Each call to the BSC scan API is limited to 10000 transactions and KTY has more 
 </li>
   
 <li>
-I have my logic currently adding all reflections and showing the resulting total owned KTY after all transactions to ensure that the math is right. However, when I use my personal KTY address I’m not getting the correct total. Theoretically, after all transactions, the KTY that my app produces should be equal to what I’m seeing in my wallet. The app says I’ve received 0.004% less than I’ve actually received. That may not seem like a lot but for a user with a large bag considering their reflections over a year’s time, it will be a lot when converted to USD (or whatever a user’s local currency). So I’m not quite sure where I’m going wrong at the moment as my logic seems sound,
+I have my logic currently adding all reflections and showing the resulting total owned KTY after all transactions to ensure that the math is right. However, when I use my personal KTY address I’m not getting the correct total. Theoretically, after all transactions, the KTY that my app produces should be equal to what I’m seeing in my wallet. The app says I’ve received roughly 0.004% more than I’ve actually received. That may not seem like a lot but for a user with a large bag considering their reflections over a year’s time, it will be a lot when converted to USD (or whatever a user’s local currency). So I’m not quite sure where I’m going wrong at the moment as my logic seems sound,
 <ul>
   <li>
-  Considering that the app is giving a number that’s less than what I’ve actually received, I’m thinking that I’m missing transactions somewhere along the line that should be considered for reflections. Haven’t figured out a way to find which transactions yet though.
+  Considering that the app is giving a number for reflections that’s more than what I’ve actually received, there are a few options for what may be happening:
+  <ol>
+    <li>
+    I'm taking 3% of the value of the transaction showing on BSC scan as the basis for determining the total reflection to be distributed. I'm not sure if the 3% should considered on the amount BSC scan is showing, or if the burn (which is recorded on BSC scan prior to the trx I'm considering) needs to be added back into the transaction before calculating the 3%. Either way I do the app gives me a larger number than what I'm actually receiving in reflections so it's possible that:
+    </li>
+    <li>
+    I'm misunderstanding, and thereby miscalculating, how the percentage of ownership determined reflections. If I am calcualting a larger ownership % than I actually have I'm going to get a larger number back for personal reflections.
+    </li>
+    <li>
+    Neither the burn value nor the trx value showing on bsc scan is accurate to what numbers are used to calculate reflections
+    </li>
+  </ol>
   </li>
   <li>
   There is the possibility that I’m considering the burns and reflections in the wrong order. I.e. Currently the logic counts the burn first and then distributes the reflection. The numbers would calculate differently if the reflection was distributed first and then burn happened. To do the latter would require very different logic since currently it just goes in order of how transactions are recorded on BSC Scan.
