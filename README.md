@@ -29,7 +29,7 @@ Each call to the BSC scan API is limited to 10000 transactions and KTY has more 
 </li>
   
 <li>
-I have my logic currently adding all reflections and showing the resulting total owned KTY after all transactions to ensure that the math is right. However, when I use my personal KTY address I’m not getting the correct total. Theoretically, after all transactions, the KTY that my app produces should be equal to what I’m seeing in my wallet. The app says I’ve received 0.004% less than I’ve actually received. That may not seem like a lot but for a user with a large bag considering their reflections over a year’s time, it will be a lot when converted to USD (or whatever a user’s local currency). So I’m not quite sure where I’m going wrong at the moment as my logic seems sound,
+I have my logic currently adding all reflections and showing the resulting total owned KTY after all transactions to ensure that the math is right. However, when I use my personal KTY address I’m not getting the correct total. Theoretically, after all transactions, the KTY that my app produces should be equal to what I’m seeing in my wallet. The app says I’ve received roughly 0.004% more than I’ve actually received. That may not seem like a lot but for a user with a large bag considering their reflections over a year’s time, it will be a lot when converted to USD (or whatever a user’s local currency). So I’m not quite sure where I’m going wrong at the moment as my logic seems sound,
 <ul>
   <li>
   Considering that the app is giving a number that’s less than what I’ve actually received, I’m thinking that I’m missing transactions somewhere along the line that should be considered for reflections. Haven’t figured out a way to find which transactions yet though.
