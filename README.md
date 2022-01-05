@@ -68,7 +68,7 @@ I have my logic currently adding all reflections and showing the resulting total
     I'm taking 3% of the value of the transaction showing on BSC scan as the basis for determining the total reflection to be distributed. I'm not sure if the 3% should considered on the amount BSC scan is showing, or if the burn (which is recorded on BSC scan prior to the trx I'm considering) needs to be added back into the transaction before calculating the 3%. Either way I do the app gives me a larger number than what I'm actually receiving in reflections so it's possible that:
     </li>
     <li>
-    I'm misunderstanding, and thereby miscalculating, how the percentage of ownership determined reflections. If I am calcualting a larger ownership % than I actually have I'm going to get a larger number back for personal reflections.
+    I'm misunderstanding, and thereby miscalculating, how the percentage of ownership determined reflections. If I am calculating a larger ownership % than I actually have I'm going to get a larger number back for personal reflections.
     </li>
     <li>
     Neither the burn value nor the trx value showing on bsc scan is accurate to what numbers are used to calculate reflections
