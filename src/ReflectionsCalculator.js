@@ -21,6 +21,7 @@ const ReflectionsCalculator = () => {
     const [formData, setFormData] = useState(initialState);
     const [trxData, setTrxData] = useState([]);
     const [trxData2, setTrxData2] = useState([]);
+    let allTrx = [];
     const [trxDataLoaded, setTrxDataLoaded] = useState(false);
     const [totalSupply, setTotalSupply] = useState(69420000000000);
     const [totalReflections, setTotalReflections] = useState(0);
@@ -39,18 +40,19 @@ const ReflectionsCalculator = () => {
             await fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&startblock=0&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
                 .then(res => res.json())
                 .then(data => {
-                    console.log(data.result);
                     setTrxData(data.result);
+                    // will be used for the subsequent calls to API as a starting transaction
                     blockNum = data.result[9999].blockNumber;
                 })
                 .catch(error => console.log(error));
 
             // second call to API for transactions after the first 10000. This is a temp solution as it's little verbose and will not work once trx 
             // are more than 20000 
-            await fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&startblock=${blockNum}&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
+            await fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&startblock=13836929&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
                 .then(res => res.json())
                 .then(data => {
                     setTrxData2(data.result);
+
                     setTrxDataLoaded(true);
                 })
                 .catch(error => console.log(error));
@@ -78,6 +80,8 @@ const ReflectionsCalculator = () => {
 
     // main logic for reflections
     const calculateReflections = (personalKtyAddress) => {
+        allTrx.push(trxData);
+        allTrx.push(trxData2);
         let totalSupply = 69420000000000;
         let personalKtyAmount = 0;
         let reflectionsForChosenDay = 0;
@@ -118,8 +122,7 @@ const ReflectionsCalculator = () => {
         
         // console.log(`Reflections for Day: ${reflectionsForChosenDay.toFixed(9)}`);
         // console.log(`Current KTY: ${personalKtyAmount.toFixed(9)}`);
-        console.log(trxData);
-        console.log(trxData2);
+        console.log(allTrx);
     }
 
     const handleButton = () => {
