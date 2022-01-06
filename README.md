@@ -2,7 +2,7 @@
 
 Thanks for checking out my Krypto Kitty Reflections App!
 
-The app is in development and does not calculate accurately reflections at the moment. The grayed out (non-editable) text boxes on the main form do not show the results of calculations, all calculations results only show in the browser's console. Only the KTY address field accepts information and is needed right now. 
+The app is in development and does not calculate accurate reflections at the moment. The grayed out (non-editable) text boxes on the main form do not show the results of calculations, all calculations results only show in the browser's console. Only the KTY address field accepts information and is needed right now. 
 
 I have written out all my thoughts about the app and what I'm trying to accomplish below. This includes the issues I'm currently having with the calculations. Please feel free to fork or clone this repository if you'd like to help try and solve these problems. I'm just focused on getting the app to pop out the right numbers at the moment so any ideas for additions to the app will need to wait for now.
 
