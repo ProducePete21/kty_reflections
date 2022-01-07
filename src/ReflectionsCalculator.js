@@ -82,7 +82,7 @@ const ReflectionsCalculator = () => {
     const calculateReflections = (personalKtyAddress) => {
         allTrx.push(trxData);
         allTrx.push(trxData2);
-        let totalSupply = 69420000000000;
+        let totalSupply = 69269317324832.28780913;
         let personalKtyAmount = 0;
         let reflectionsForChosenDay = 0;
         // +1 every loop to assure that my logic is counting the correct number of transactions
