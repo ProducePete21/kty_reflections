@@ -82,9 +82,10 @@ const ReflectionsCalculator = () => {
     const calculateReflections = (personalKtyAddress) => {
         allTrx.push(trxData);
         allTrx.push(trxData2);
-        let totalSupply = 69269317324832.28780913;
+        let totalSupply = 69420000000000;
         let personalKtyAmount = 0;
         let reflectionsForChosenDay = 0;
+        let totalReflections = 0;
         // +1 every loop to assure that my logic is counting the correct number of transactions
         let TrxCount = 0;
 
@@ -114,6 +115,7 @@ const ReflectionsCalculator = () => {
                         const elementReflection = ((trx.value * decimalConst) * 0.03) * ownershipPercentage;
                 
                         personalKtyAmount = personalKtyAmount + elementReflection;
+                        totalReflections = totalReflections + elementReflection;
                         
                         const elementDate = new Date(trx.timeStamp * timeStampConst);
 
@@ -127,8 +129,9 @@ const ReflectionsCalculator = () => {
         
         
         console.log(`Reflections for Day: ${reflectionsForChosenDay.toFixed(9)}`);
+        console.log(`Total Received Reflections: ${totalReflections}`);
         console.log(`Current KTY: ${personalKtyAmount.toFixed(9)}`);
-        console.log(TrxCount);
+        console.log(`Total Transcation considered: ${TrxCount}`);
     }
 
     const handleButton = () => {
