@@ -93,7 +93,7 @@ const ReflectionsCalculator = () => {
             trxArray.forEach(trx => {
                 // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply   
                 if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0) {
-                        totalSupply = totalSupply - (trx.value * decimalConst);
+                        console.log(totalSupply);
                 // Checks for trx sent to user's wallet and adds value to personalKtyAmount         
                 } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
