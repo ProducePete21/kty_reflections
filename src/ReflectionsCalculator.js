@@ -87,18 +87,23 @@ const ReflectionsCalculator = () => {
         let reflectionsForChosenDay = 0;
         let totalReflections = 0;
         // +1 every loop to assure that my logic is counting the correct number of transactions
-        let TrxCount = 0;
+        let trxCount = 0;
 
         // iterates through each set of 10000 transactions in order
         allTrx.forEach(trxArray => {
             trxArray.forEach(trx => {
                 // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply   
-                if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0) {
-                        console.log(totalSupply);
-                // Checks for trx sent to user's wallet and adds value to personalKtyAmount         
+                if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0 && !trx.to.endsWith('dead')) {
+                        totalSupply = totalSupply - (trx.value * decimalConst);
+                // Checks for trx sent to user's wallet (receiving or buying) and adds value to personalKtyAmount         
                 } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
-                        console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
+                        console.log(`KTY after receiving : ${personalKtyAmount.toFixed(9)}`);
+                        console.log(`Timestamp: ${trx.timeStamp}`);
+                // Check for trx sent from (sending or selling) user's wallet and subtracts value from personalKtyAmount
+                } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
+                        personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
+                        console.log(`KTY after sending: ${personalKtyAmount.toFixed(9)}`);
                         console.log(`Timestamp: ${trx.timeStamp}`);
                 // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
@@ -111,8 +116,9 @@ const ReflectionsCalculator = () => {
                 
                         console.log(`Total Supply: ${totalSupply.toFixed(9)}`);
                         console.log(`% owned: ${ownershipPercentage.toFixed(9)}`);
-                
-                        const elementReflection = ((trx.value * decimalConst) * 0.03) * ownershipPercentage;
+                    
+                        // 3.125% is used because the transaction value from bsc scan is 96% of the actual transaction amount. It's the amount transferred after the 4% burn and reflection tax.
+                        const elementReflection = ((trx.value * decimalConst) * 0.03125) * ownershipPercentage;
                 
                         personalKtyAmount = personalKtyAmount + elementReflection;
                         totalReflections = totalReflections + elementReflection;
@@ -124,14 +130,15 @@ const ReflectionsCalculator = () => {
                             reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
                         }
                 }
-                TrxCount++;
+                trxCount++;
         })})
         
         
         console.log(`Reflections for Day: ${reflectionsForChosenDay.toFixed(9)}`);
         console.log(`Total Received Reflections: ${totalReflections}`);
         console.log(`Current KTY: ${personalKtyAmount.toFixed(9)}`);
-        console.log(`Total Transcation considered: ${TrxCount}`);
+        console.log(`Current Total Supply: ${totalSupply}`)
+        console.log(`Total Transcation considered: ${trxCount}`);
     }
 
     const handleButton = () => {
