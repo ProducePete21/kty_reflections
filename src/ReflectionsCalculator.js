@@ -27,9 +27,10 @@ const ReflectionsCalculator = () => {
     const [totalReflections, setTotalReflections] = useState(0);
     const [reflectionsForDate, setReflectionsForDate] = useState(0);
     const [currentTotalKTY, setCurrentTotalKTY] = useState(0);
+    const [trxCount, setTrxCount] = useState(0);
     const [fadeIn, setFadeIn] = useState(false);
     const [showDialog, setShowDialog] = useState(false);
-    const [showResult, setShowResult] = useState(true);
+    const [showResult, setShowResult] = useState(false);
     const [warning, setWarning] = useState('');
 
 
@@ -98,24 +99,24 @@ const ReflectionsCalculator = () => {
                 // Checks for trx sent to user's wallet (receiving or buying) and adds value to personalKtyAmount         
                 } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
-                        console.log(`KTY after receiving : ${personalKtyAmount.toFixed(9)}`);
+                        console.log(`KTY after receiving : ${personalKtyAmount.toFixed(2)}`);
                         console.log(`Timestamp: ${trx.timeStamp}`);
                 // Check for trx sent from (sending or selling) user's wallet and subtracts value from personalKtyAmount
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
-                        console.log(`KTY after sending: ${personalKtyAmount.toFixed(9)}`);
+                        console.log(`KTY after sending: ${personalKtyAmount.toFixed(2)}`);
                         console.log(`Timestamp: ${trx.timeStamp}`);
                 // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
-                        console.log(`KTY: ${personalKtyAmount.toFixed(9)}`);
+                        console.log(`KTY: ${personalKtyAmount.toFixed(2)}`);
                         console.log(`Timestamp: ${trx.timeStamp}`);
                 // Checks for trx that is reflections eligible and runs reflections math
                 } else if(trx.value !== 0 && !trx.to.startsWith('0x000000000000000000000') && !trx.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !trx.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
                         const ownershipPercentage = personalKtyAmount / totalSupply;
                 
-                        console.log(`Total Supply: ${totalSupply.toFixed(9)}`);
-                        console.log(`% owned: ${ownershipPercentage.toFixed(9)}`);
+                        console.log(`Total Supply: ${totalSupply.toFixed(2)}`);
+                        console.log(`% owned: ${ownershipPercentage.toFixed(5)}`);
                     
                         // 3.125% is used because the transaction value from bsc scan is 96% of the actual transaction amount. It's the amount transferred after the 4% burn and reflection tax.
                         const elementReflection = ((trx.value * decimalConst) * 0.03125) * ownershipPercentage;
@@ -133,16 +134,18 @@ const ReflectionsCalculator = () => {
                 trxCount++;
         })})
         
-        
-        console.log(`Reflections for Day: ${reflectionsForChosenDay.toFixed(9)}`);
-        console.log(`Total Received Reflections: ${totalReflections}`);
-        console.log(`Current KTY: ${personalKtyAmount.toFixed(9)}`);
-        console.log(`Current Total Supply: ${totalSupply}`)
-        console.log(`Total Transcation considered: ${trxCount}`);
+        const formatNumber = new Intl.NumberFormat('en-US');
+        setReflectionsForDate(formatNumber.format(reflectionsForChosenDay.toFixed(2)));
+        setTotalReflections(formatNumber.format(totalReflections.toFixed(2)));
+        setCurrentTotalKTY(formatNumber.format(personalKtyAmount.toFixed(2)));
+        setTotalSupply(formatNumber.format(totalSupply));
+        setTrxCount(formatNumber.format(trxCount));
+        setShowResult(true);
+        setFadeIn(true);
     }
 
     const handleButton = () => {
-        calculateReflections(formData.personalKtyAddress)        
+        calculateReflections(formData.personalKtyAddress);     
     }
 
     const closeDialog = () => {
@@ -150,36 +153,45 @@ const ReflectionsCalculator = () => {
     }
     
     // A Div for displaying result of calculation. A leftover from previous app, not sure If I'm going to use it in this app yet.
-    // const result = (
-    //     <Grid container justifyContent='center'>
-    //         <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
-    //             <Typography align='center' gutterBottom>
-    //                 {`If you were to stake ${formData.totalAmp} AMP right now, it will take about ${howLong()} for your rewards to recoup the cost of staking`}
-    //             </Typography>
-    //             <Typography align='center' gutterBottom>
-    //                 {`Note: This is based on the current AMP price of $${currentAmpPrice}. The price per AMP is always changing which will affect how quickly the fees are recouped`}
-    //             </Typography>
-    //         </Card>
-    //     </Grid>
-    // );
+    const result = (
+        <Grid container justifyContent='center'>
+            <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
+                <Typography align='center' gutterBottom>
+                    {`Reflections for Day: ${reflectionsForDate}`}
+                </Typography>
+                <Typography align='center' gutterBottom>
+                    {`Total Received Reflections: ${totalReflections}`}
+                </Typography>
+                <Typography align='center' gutterBottom>
+                    {`Current KTY: ${currentTotalKTY}`}
+                </Typography>
+                <Typography align='center' gutterBottom>
+                    {`Current Total Supply: ${totalSupply}`}
+                </Typography>
+                <Typography align='center' gutterBottom>
+                    {`Total Transcation considered: ${trxCount}`}
+                </Typography>
+            </Card>
+        </Grid>
+    );
 
     // A Div for displaying needed information if a user inputs wrong info. This is leftover from the previous AMP calc, not sure if I'll need this app yet.
-    // const notABscAddress = (
-    //     <Grid container justifyContent='center'>
-    //         <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
-    //             <Typography>
-    //                 Check your entered values:
-    //             </Typography>
-    //             <Typography gutterBottom style={{paddingRight: '10px'}}>
-    //                 <ul>
-    //                     <li>All fields are required</li>
-    //                     <li>None of the fields can equal 0</li>
-    //                     <li>Fields can only contain numbers</li>
-    //                 </ul>
-    //             </Typography>
-    //         </Card>
-    //     </Grid>
-    // );
+    const notABscAddress = (
+        <Grid container justifyContent='center'>
+            <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
+                <Typography>
+                    Check your entered values:
+                </Typography>
+                <Typography gutterBottom style={{paddingRight: '10px'}}>
+                    <ul>
+                        <li>All fields are required</li>
+                        <li>None of the fields can equal 0</li>
+                        <li>Fields can only contain numbers</li>
+                    </ul>
+                </Typography>
+            </Card>
+        </Grid>
+    );
 
     return(
         <div>
@@ -195,26 +207,17 @@ const ReflectionsCalculator = () => {
                             <AmpCalcInput name='personalKtyAddress' id='personalKtyAddress' label='KTY address' autoFocus type='text' handleChange={handleChange} />
                             <AmpCalcInput name='date' id='date' label='Calender Placeholder Field' type='text' handleChange={handleChange} />
                             { trxDataLoaded ?
-                                <AmpCalcAutoFill name='ktyReflectionForDate' id='ktyReflectionForDate' label='KTY Received on Selected date' type='text' value={reflectionsForDate} handleChange={handleChange} />
+                                <div>
+                                <Typography align='center' style={{marginTop: '10px'}}>
+                                    Data loaded
+                                </Typography>
+                                <Button variant='contained' onClick={handleButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Show Reflections</Button>
+                                </div>
                                 :
-                                <Loading />
+                                <Typography align='center' style={{marginTop: '10px'}}>
+                                    Waiting for data to load!
+                                </Typography>
                             }
-                            { trxDataLoaded ?
-                                <AmpCalcAutoFill name='totalReflections' id='totalReflections' label='Total Reflections Received' type='text' value={totalReflections} handleChange={handleChange} />
-                                :
-                                <Loading />
-                            }
-                            { trxDataLoaded ?
-                                <AmpCalcAutoFill name='currentTotalKTY' id='currentTotalKTY' label='Current Total KTY Owned' value={currentTotalKTY} type='text' handleChange={handleChange} />
-                                :
-                                <Loading />
-                            }
-                            { trxDataLoaded ?
-                                <AmpCalcAutoFill name='currentTotalSupply' id='currentTotalSupply' label='Current Total Supply' value={totalSupply} type='text' handleChange={handleChange} />
-                                :
-                                <Loading />
-                            }
-                            <Button variant='contained' onClick={handleButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Show Reflections</Button>
                             <Typography align='center' style={{paddingTop: '20px'}}>KTY transaction data provided by {<a href='https://bscscan.com/token/0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb' target='_blank' rel="noreferrer noopener">BSC Scan</a>}</Typography>
                         </Grid>
                         </Card>
@@ -224,15 +227,15 @@ const ReflectionsCalculator = () => {
                     </Grid>
                 </Grid>
             </div>
-            {/* { showResult ? 
+            { showResult ? 
             <div style={{marginTop: '40px'}}>
                 <Fade in={fadeIn}>{result}</Fade>
             </div>
             :
             <div style={{marginTop: '40px'}}>
-                <Fade in={fadeIn}>{notANumber}</Fade>
+                <Fade in={fadeIn}>{notABscAddress}</Fade>
             </div>
-            } */}
+            }
             <div>
                 <Footer />
             </div>
