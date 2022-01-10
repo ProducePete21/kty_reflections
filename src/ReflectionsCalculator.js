@@ -30,6 +30,7 @@ const ReflectionsCalculator = () => {
     const [currentTotalKTY, setCurrentTotalKTY] = useState(0);
     const [trxCount, setTrxCount] = useState(0);
     const [fadeIn, setFadeIn] = useState(false);
+    const [calcRunning, setCalcRunning] = useState(false);
     const [showDialog, setShowDialog] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [warning, setWarning] = useState('');
@@ -82,6 +83,7 @@ const ReflectionsCalculator = () => {
 
     // main logic for reflections
     const calculateReflections = (personalKtyAddress) => {
+        console.log(fadeIn);
         allTrx.push(trxData);
         allTrx.push(trxData2);
         let totalSupply = 69420000000000;
@@ -100,24 +102,15 @@ const ReflectionsCalculator = () => {
                 // Checks for trx sent to user's wallet (receiving or buying) and adds value to personalKtyAmount         
                 } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
-                        console.log(`KTY after receiving : ${personalKtyAmount.toFixed(2)}`);
-                        console.log(`Timestamp: ${trx.timeStamp}`);
                 // Check for trx sent from (sending or selling) user's wallet and subtracts value from personalKtyAmount
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
-                        console.log(`KTY after sending: ${personalKtyAmount.toFixed(2)}`);
-                        console.log(`Timestamp: ${trx.timeStamp}`);
                 // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
-                        console.log(`KTY: ${personalKtyAmount.toFixed(2)}`);
-                        console.log(`Timestamp: ${trx.timeStamp}`);
                 // Checks for trx that is reflections eligible and runs reflections math
                 } else if(trx.value !== 0 && !trx.to.startsWith('0x000000000000000000000') && !trx.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !trx.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
                         const ownershipPercentage = personalKtyAmount / totalSupply;
-                
-                        console.log(`Total Supply: ${totalSupply.toFixed(2)}`);
-                        console.log(`% owned: ${ownershipPercentage.toFixed(5)}`);
                     
                         // 3.125% is used because the transaction value from bsc scan is 96% of the actual transaction amount. It's the amount transferred after the 4% burn and reflection tax.
                         const elementReflection = ((trx.value * decimalConst) * 0.03125) * ownershipPercentage;
@@ -146,6 +139,7 @@ const ReflectionsCalculator = () => {
     }
 
     const handleButton = () => {
+        setCalcRunning(true);
         calculateReflections(formData.personalKtyAddress);     
     }
 
@@ -216,27 +210,30 @@ const ReflectionsCalculator = () => {
                         <Grid container spacing={2} direction='column' alignItems='center' raised style={{padding: '16px', minWidth: '250px', maxWidth: '645px', marginLeft: '0px', marginTop: '0px', width: '100%' }}>
                             <Typography align='center' style={{margin: '10px'}}>Use this simple calculator to help determine your KTY reflections</Typography>
                             <ReflectionsCalcInput name='personalKtyAddress' id='personalKtyAddress' label='KTY address' autoFocus type='text' handleChange={handleChange} />
-                            <DatePicker 
-                                selected={formData.date}
-                                onChange={date => handleDateChange(date)}
-                                peekNextMonth
-                                showMonthDropdown
-                                showYearDropdown
-                                dropdownMode='select'
-                            />
+                            <Grid item style={{marginTop: '20px'}}>
+                                <DatePicker 
+                                    selected={formData.date}
+                                    onChange={date => handleDateChange(date)}
+                                    peekNextMonth
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode='select'
+                                    inline
+                                />
+                            </Grid>
                             { trxDataLoaded ?
                                 <div>
-                                <Typography align='center' style={{marginTop: '10px'}}>
+                                <Typography align='center' style={{marginTop: '20px'}}>
                                     Data loaded
                                 </Typography>
                                 <Button variant='contained' onClick={handleButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Show Reflections</Button>
                                 </div>
                                 :
-                                <Typography align='center' style={{marginTop: '10px'}}>
-                                    Waiting for data to load!
-                                </Typography>
+                                <div>
+                                    <Loading />
+                                </div>
                             }
-                            <Typography align='center' style={{paddingTop: '20px'}}>KTY transaction data provided by {<a href='https://bscscan.com/token/0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb' target='_blank' rel="noreferrer noopener">BSC Scan</a>}</Typography>
+                            <Typography align='center' style={{paddingTop: '20px', marginTop: '10px'}}>KTY transaction data provided by {<a href='https://bscscan.com/token/0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb' target='_blank' rel="noreferrer noopener">BSC Scan</a>}</Typography>
                         </Grid>
                         </Card>
                     </Grid>
@@ -245,14 +242,26 @@ const ReflectionsCalculator = () => {
                     </Grid>
                 </Grid>
             </div>
-            { showResult ? 
-            <div style={{marginTop: '40px'}}>
-                <Fade in={fadeIn}>{result}</Fade>
-            </div>
-            :
-            <div style={{marginTop: '40px'}}>
-                <Fade in={fadeIn}>{notABscAddress}</Fade>
-            </div>
+            {showResult ?
+                <Fade in={fadeIn}>
+                    <div style={{marginTop: '40px'}}>
+                        {result}
+                    </div>
+                </Fade>
+                :
+                <div style={{marginTop: '40px'}}>
+                    <Grid container justifyContent='center'>
+                        <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
+                            <Typography align='center' gutterBottom>
+                                { calcRunning ?
+                                    'CATculating Reflections...'
+                                    :
+                                    'Reflections with show here'
+                                }
+                            </Typography>
+                        </Card>
+                    </Grid>
+                </div>
             }
             <div>
                 <Footer />
