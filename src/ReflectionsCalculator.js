@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import DatePicker from 'react-datepicker';
 
 import { Grid, Typography, Card, Button, Fade } from '@mui/material';
 
-import AmpCalcInput from './ReflectionsCalcInput';
-import AmpCalcAutoFill from './ReflectionsCalcAutoFill';
+import ReflectionsCalcInput from './ReflectionsCalcInput';
 import Footer from './Footer';
 import WarningDialogPopover from './WarningDialogPopover';
 import Loading from './Loading';
+
+import 'react-datepicker/dist/react-datepicker.css';
 
 const initialState = {
     personalKtyAddress: '',
     date: new Date('December 25, 2021 00:00:01'),
 }
 
-const dateNow = new Date();
 const decimalConst = 0.000000001;
 const timeStampConst = 1000;
 
@@ -148,6 +149,16 @@ const ReflectionsCalculator = () => {
         calculateReflections(formData.personalKtyAddress);     
     }
 
+    const handleDateChange = (date) => {
+        setFormData({...formData, date: date})
+    }
+
+    const formattedDate = () => {
+        const options = { month: 'short' };
+        const monthName = new Intl.DateTimeFormat('en-US', options).format(formData.date);
+        return `${monthName} ${formData.date.getDay()}, ${formData.date.getFullYear()}`;
+    }
+
     const closeDialog = () => {
         setShowDialog(false);
     }
@@ -157,7 +168,7 @@ const ReflectionsCalculator = () => {
         <Grid container justifyContent='center'>
             <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
                 <Typography align='center' gutterBottom>
-                    {`Reflections for Day: ${reflectionsForDate}`}
+                    {`Reflections for ${formattedDate()}: ${reflectionsForDate}`}
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Total Received Reflections: ${totalReflections}`}
@@ -204,8 +215,15 @@ const ReflectionsCalculator = () => {
                         <Card elevation={10}>
                         <Grid container spacing={2} direction='column' alignItems='center' raised style={{padding: '16px', minWidth: '250px', maxWidth: '645px', marginLeft: '0px', marginTop: '0px', width: '100%' }}>
                             <Typography align='center' style={{margin: '10px'}}>Use this simple calculator to help determine your KTY reflections</Typography>
-                            <AmpCalcInput name='personalKtyAddress' id='personalKtyAddress' label='KTY address' autoFocus type='text' handleChange={handleChange} />
-                            <AmpCalcInput name='date' id='date' label='Calender Placeholder Field' type='text' handleChange={handleChange} />
+                            <ReflectionsCalcInput name='personalKtyAddress' id='personalKtyAddress' label='KTY address' autoFocus type='text' handleChange={handleChange} />
+                            <DatePicker 
+                                selected={formData.date}
+                                onChange={date => handleDateChange(date)}
+                                peekNextMonth
+                                showMonthDropdown
+                                showYearDropdown
+                                dropdownMode='select'
+                            />
                             { trxDataLoaded ?
                                 <div>
                                 <Typography align='center' style={{marginTop: '10px'}}>
