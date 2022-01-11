@@ -6,13 +6,14 @@ import { Grid, Typography, Card, Button, Fade } from '@mui/material';
 import ReflectionsCalcInput from './ReflectionsCalcInput';
 import Footer from './Footer';
 import WarningDialogPopover from './WarningDialogPopover';
+import IntroPopover from './IntroPopover';
 import Loading from './Loading';
 
 import 'react-datepicker/dist/react-datepicker.css';
 
 const initialState = {
     personalKtyAddress: '',
-    date: new Date('December 25, 2021 00:00:01'),
+    date: new Date(),
 }
 
 const decimalConst = 0.000000001;
@@ -32,39 +33,16 @@ const ReflectionsCalculator = () => {
     const [fadeIn, setFadeIn] = useState(false);
     const [calcRunning, setCalcRunning] = useState(false);
     const [showDialog, setShowDialog] = useState(false);
+    const [showIntroDialog, setShowIntroDialog] = useState(true);
     const [showResult, setShowResult] = useState(false);
     const [loadButton, setLoadButton] = useState(true);
     const [warning, setWarning] = useState('');
 
 
-    // useEffect(() => {
-    //     let blockNum;
-    //     // pulls all transaction info about KTY from BSC Scan
-    //     const fetchingData = async () => {
-    //         await fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&startblock=0&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
-    //             .then(res => res.json())
-    //             .then(data => {
-    //                 setTrxData(data.result);
-    //                 // will be used for the subsequent calls to API as a starting transaction
-    //                 blockNum = data.result[9999].blockNumber;
-    //             })
-    //             .catch(error => console.log(error));
+    useEffect(() => {
+        
 
-    //         // second call to API for transactions after the first 10000. This is a temp solution as it's little verbose and will not work once trx 
-    //         // are more than 20000 
-    //         await fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&startblock=13836929&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
-    //             .then(res => res.json())
-    //             .then(data => {
-    //                 setTrxData2(data.result);
-
-    //                 setTrxDataLoaded(true);
-    //             })
-    //             .catch(error => console.log(error));
-    //     }
-
-    //     fetchingData();
-
-    // }, [])
+    }, [])
 
     const loadData = () => {
         let blockNum;
@@ -133,7 +111,7 @@ const ReflectionsCalculator = () => {
                         personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
                 // Check for trx sent from (sending or selling) user's wallet and subtracts value from personalKtyAmount
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
-                        personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
+                        personalKtyAmount = personalKtyAmount - ((trx.value * decimalConst) / 0.96 );
                 // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
@@ -184,11 +162,15 @@ const ReflectionsCalculator = () => {
     const formattedDate = () => {
         const options = { month: 'short' };
         const monthName = new Intl.DateTimeFormat('en-US', options).format(formData.date);
-        return `${monthName} ${formData.date.getDay()}, ${formData.date.getFullYear()}`;
+        return `${monthName} ${formData.date.getDate()}, ${formData.date.getFullYear()}`;
     }
 
     const closeDialog = () => {
         setShowDialog(false);
+    }
+
+    const closeIntroDialog = () => {
+        setShowIntroDialog(false);
     }
     
     // A Div for displaying result of calculation. A leftover from previous app, not sure If I'm going to use it in this app yet.
@@ -196,19 +178,19 @@ const ReflectionsCalculator = () => {
         <Grid container justifyContent='center'>
             <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
                 <Typography align='center' gutterBottom>
-                    {`Reflections for ${formattedDate()}: ${reflectionsForDate}`}
+                    {`Reflections for ${formattedDate()}: ${reflectionsForDate} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Total Received Reflections: ${totalReflections}`}
+                    {`Total Received Reflections: ${totalReflections} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Current KTY: ${currentTotalKTY}`}
+                    {`Current KTY: ${currentTotalKTY} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Current Total Supply: ${totalSupply}`}
+                    {`Current Total Supply: ${totalSupply} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Total Transcation considered: ${trxCount}`}
+                    {`Total Transcation considered: ${trxCount} Transactions`}
                 </Typography>
             </Card>
         </Grid>
@@ -245,7 +227,7 @@ const ReflectionsCalculator = () => {
                             <Typography align='center' style={{margin: '10px'}}>Use this simple calculator to help determine your KTY reflections</Typography>
                             <Typography align='center' style={{marginTop: '10px', fontWeight: 'bold'}}>Enter your public KTY Address below:</Typography>
                             <ReflectionsCalcInput name='personalKtyAddress' id='personalKtyAddress' label='KTY address' autoFocus type='text' handleChange={handleChange} />
-                            <Typography align='center' style={{marginTop: '30px', fontWeight: 'bold'}}>Select a date to see your relfections for that day:</Typography>
+                            <Typography align='center' style={{marginTop: '30px', fontWeight: 'bold'}}>Select a date from the calendar:</Typography>
                             <Grid item style={{marginTop: '10px', paddingLeft: '0px', paddingTop: '10px'}}>
                                 <DatePicker 
                                     selected={formData.date}
@@ -317,6 +299,7 @@ const ReflectionsCalculator = () => {
                 <Footer />
             </div>
             <WarningDialogPopover open={showDialog} onClose={closeDialog} warning={warning} />
+            <IntroPopover open={showIntroDialog} onClose={closeIntroDialog} />
         </div>
     )
 }
