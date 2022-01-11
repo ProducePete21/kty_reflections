@@ -33,10 +33,40 @@ const ReflectionsCalculator = () => {
     const [calcRunning, setCalcRunning] = useState(false);
     const [showDialog, setShowDialog] = useState(false);
     const [showResult, setShowResult] = useState(false);
+    const [loadButton, setLoadButton] = useState(true);
     const [warning, setWarning] = useState('');
 
 
-    useEffect(() => {
+    // useEffect(() => {
+    //     let blockNum;
+    //     // pulls all transaction info about KTY from BSC Scan
+    //     const fetchingData = async () => {
+    //         await fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&startblock=0&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
+    //             .then(res => res.json())
+    //             .then(data => {
+    //                 setTrxData(data.result);
+    //                 // will be used for the subsequent calls to API as a starting transaction
+    //                 blockNum = data.result[9999].blockNumber;
+    //             })
+    //             .catch(error => console.log(error));
+
+    //         // second call to API for transactions after the first 10000. This is a temp solution as it's little verbose and will not work once trx 
+    //         // are more than 20000 
+    //         await fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&startblock=13836929&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
+    //             .then(res => res.json())
+    //             .then(data => {
+    //                 setTrxData2(data.result);
+
+    //                 setTrxDataLoaded(true);
+    //             })
+    //             .catch(error => console.log(error));
+    //     }
+
+    //     fetchingData();
+
+    // }, [])
+
+    const loadData = () => {
         let blockNum;
         // pulls all transaction info about KTY from BSC Scan
         const fetchingData = async () => {
@@ -62,8 +92,7 @@ const ReflectionsCalculator = () => {
         }
 
         fetchingData();
-
-    }, [])
+    }
 
     const handleChange = ({target}) => {
         setFormData({...formData, [target.name]: target.value})
@@ -143,6 +172,11 @@ const ReflectionsCalculator = () => {
         calculateReflections(formData.personalKtyAddress);     
     }
 
+    const handleLoadButton = () => {
+        setLoadButton(false);
+        loadData();
+    }
+
     const handleDateChange = (date) => {
         setFormData({...formData, date: date})
     }
@@ -209,8 +243,10 @@ const ReflectionsCalculator = () => {
                         <Card elevation={10}>
                         <Grid container spacing={2} direction='column' alignItems='center' raised style={{padding: '16px', minWidth: '250px', maxWidth: '645px', marginLeft: '0px', marginTop: '0px', width: '100%' }}>
                             <Typography align='center' style={{margin: '10px'}}>Use this simple calculator to help determine your KTY reflections</Typography>
+                            <Typography align='center' style={{marginTop: '10px', fontWeight: 'bold'}}>Enter your public KTY Address below:</Typography>
                             <ReflectionsCalcInput name='personalKtyAddress' id='personalKtyAddress' label='KTY address' autoFocus type='text' handleChange={handleChange} />
-                            <Grid item style={{marginTop: '20px'}}>
+                            <Typography align='center' style={{marginTop: '30px', fontWeight: 'bold'}}>Select a date to see your relfections for that day:</Typography>
+                            <Grid item style={{marginTop: '10px', paddingLeft: '0px', paddingTop: '10px'}}>
                                 <DatePicker 
                                     selected={formData.date}
                                     onChange={date => handleDateChange(date)}
@@ -221,12 +257,26 @@ const ReflectionsCalculator = () => {
                                     inline
                                 />
                             </Grid>
-                            { trxDataLoaded ?
+                            { loadButton ?
+                                <Grid container direction='column' alignItems='center'>
+                                    <Grid item>
+                                        <Typography align='center' style={{marginTop: '20px', fontWeight: 'bold'}}>
+                                            Click button below to load BSC Scan Transaction data:
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Button variant='contained' onClick={handleLoadButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Load Trx Data</Button>
+                                    </Grid>
+                                </Grid>
+                            :
+                            trxDataLoaded ?
                                 <div>
-                                <Typography align='center' style={{marginTop: '20px'}}>
-                                    Data loaded
-                                </Typography>
-                                <Button variant='contained' onClick={handleButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Show Reflections</Button>
+                                    <div style={{borderBottom: 'solid', borderBottomWidth: 'thin', borderRadius: '5px', borderColor: 'rgba(189, 195, 199, 0.9)', backgroundColor: 'rgba(0, 0, 0, 0.08)', marginTop: '20px', paddingBottom: '8px', paddingTop: '10px'}}>
+                                        <Typography align='center'>
+                                            Data loaded
+                                        </Typography>
+                                    </div>
+                                    <Button variant='contained' onClick={handleButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Show Reflections</Button>
                                 </div>
                                 :
                                 <div>

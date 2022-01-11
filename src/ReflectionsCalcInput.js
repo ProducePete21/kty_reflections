@@ -4,7 +4,7 @@ import { Grid, TextField } from '@mui/material';
 
 const ReflectionsCalcInput = ({name, id, handleChange, label, value, autoFocus, type}) => {
     return(
-        <Grid item style={{width: '300px'}}>
+        <Grid item style={{width: '300px', paddingLeft: '0px', paddingTop: '10px'}}>
             <TextField 
                 name={name}
                 id={id}
