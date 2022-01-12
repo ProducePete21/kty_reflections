@@ -42,6 +42,7 @@ const ReflectionsCalculator = () => {
 
     useEffect(() => {
         setShowIntroDialog(true);
+        console.log(window.innerWidth)
     }, [])
 
     const loadData = () => {
@@ -134,7 +135,7 @@ const ReflectionsCalculator = () => {
     }
 
     const handleButton = () => {
-        if(window.screenX < 400) {
+        if(window.innerWidth < 400) {
             setMaxWidth('285px');
         }
         window.scrollTo({top: 500, behavior: 'smooth'})
@@ -234,7 +235,7 @@ const ReflectionsCalculator = () => {
         <div>
             <div>
                 <Grid container spacing={25} justifyContent='center' style={{flexWrap: 'nowrap', paddingTop: '50px'}}>
-                    { maxWidth > 400 ?
+                    { window.innerWidth > 400 ?
                     <Grid item>
                         <img src='kitty-and-coin_modified.png' alt='kittyLogo' />
                     </Grid>
@@ -243,7 +244,7 @@ const ReflectionsCalculator = () => {
                     }
                     <Grid item>
                         <Card elevation={10}>
-                        <Grid container spacing={2} direction='column' alignItems='center' raised style={{padding: '16px', minWidth: '250px', maxWidth: (window.screenX < 400 ? '345px' : '645px'), marginLeft: '0px', marginTop: '0px', width: '100%' }}>
+                        <Grid container spacing={2} direction='column' alignItems='center' raised style={{padding: '16px', minWidth: '250px', maxWidth: (window.innerWidth < 400 ? '345px' : '645px'), marginLeft: '0px', marginTop: '0px', width: '100%' }}>
                             <Typography align='center' style={{margin: '10px'}}>Use this simple calculator to help determine your KTY reflections</Typography>
                             <Typography align='center' style={{marginTop: '10px', fontWeight: 'bold'}}>Enter your public KTY Address below:</Typography>
                             <ReflectionsCalcInput name='personalKtyAddress' id='personalKtyAddress' label='KTY address' autoFocus type='text' handleChange={handleChange} />
@@ -289,7 +290,7 @@ const ReflectionsCalculator = () => {
                         </Grid>
                         </Card>
                     </Grid>
-                    { maxWidth > 400 ?
+                    { window.innerWidth > 400 ?
                     <Grid item>
                         <img src='kitty-and-coin_modified.png' alt='kittyLogo' />
                     </Grid>
