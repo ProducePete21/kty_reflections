@@ -214,7 +214,7 @@ const ReflectionsCalculator = () => {
                     <Typography gutterBottom style={{paddingRight: '10px'}}>
                         <ul>
                             <li>Check that your KTY address is correct</li>
-                            <li>KTY address start with '0x'</li>
+                            <li>KTY addresses start with '0x'</li>
                             <li>Fields can only contain numbers and letters</li>
                         </ul>
                     </Typography>
