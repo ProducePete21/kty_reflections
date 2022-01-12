@@ -157,6 +157,7 @@ const ReflectionsCalculator = () => {
     }
 
     const handleDateChange = (date) => {
+        date.setHours(12, 0, 0);
         setFormData({...formData, date: date})
     }
 
@@ -186,9 +187,6 @@ const ReflectionsCalculator = () => {
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Total Received Reflections: ${totalReflections} KTY`}
-                </Typography>
-                <Typography align='center' gutterBottom>
-                    {`Current KTY: ${currentTotalKTY} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Current Total Supply: ${totalSupply} KTY`}
