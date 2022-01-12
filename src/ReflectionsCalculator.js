@@ -25,7 +25,7 @@ const ReflectionsCalculator = () => {
     const [trxData2, setTrxData2] = useState([]);
     let allTrx = [];
     const [trxDataLoaded, setTrxDataLoaded] = useState(false);
-    const [totalSupply, setTotalSupply] = useState(69420000000000);
+    const [fullTotalSupply, setFullTotalSupply] = useState(69420000000000);
     const [totalReflections, setTotalReflections] = useState(0);
     const [reflectionsForDate, setReflectionsForDate] = useState(0);
     const [currentTotalKTY, setCurrentTotalKTY] = useState(0);
@@ -83,6 +83,7 @@ const ReflectionsCalculator = () => {
         allTrx.push(trxData);
         allTrx.push(trxData2);
         let totalSupply = 69420000000000;
+        let fullTotalSupply = 69420000000000;
         let personalKtyAmount = 0;
         let reflectionsForChosenDay = 0;
         let totalReflections = 0;
@@ -92,7 +93,11 @@ const ReflectionsCalculator = () => {
         // iterates through each set of 10000 transactions in order
         allTrx.forEach(trxArray => {
             trxArray.forEach(trx => {
-                // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply   
+                // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply to be display   
+                if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0) {
+                    fullTotalSupply = fullTotalSupply - (trx.value * decimalConst);      
+                } 
+                // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply to used for reflections math
                 if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0 && !trx.to.endsWith('dead')) {
                         totalSupply = totalSupply - (trx.value * decimalConst);
                 // Checks for trx sent to user's wallet (receiving or buying) and adds value to personalKtyAmount         
@@ -128,7 +133,7 @@ const ReflectionsCalculator = () => {
         setReflectionsForDate(formatNumber.format(reflectionsForChosenDay.toFixed(2)));
         setTotalReflections(formatNumber.format(totalReflections.toFixed(2)));
         setCurrentTotalKTY(formatNumber.format(personalKtyAmount.toFixed(2)));
-        setTotalSupply(formatNumber.format(totalSupply));
+        setFullTotalSupply(formatNumber.format(fullTotalSupply));
         setTrxCount(formatNumber.format(trxCount));
         setShowResult(true);
         setFadeIn(true);
@@ -197,7 +202,7 @@ const ReflectionsCalculator = () => {
                     {`Total Received Reflections: ${totalReflections} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Current Total Supply: ${totalSupply} KTY`}
+                    {`Current Total Supply: ${fullTotalSupply} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Total Transcation considered: ${trxCount} Transactions`}
