@@ -205,7 +205,7 @@ const ReflectionsCalculator = () => {
                     {`Current Total Supply: ${fullTotalSupply} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Total Transcation considered: ${trxCount} Transactions`}
+                    {`Total Transcations Considered: ${trxCount} Transactions`}
                 </Typography>
                 <Grid container justifyContent='center'>
                 <Button variant='contained' onClick={handleResultsButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Back To Top</Button>
