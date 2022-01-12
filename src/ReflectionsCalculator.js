@@ -33,15 +33,14 @@ const ReflectionsCalculator = () => {
     const [fadeIn, setFadeIn] = useState(false);
     const [calcRunning, setCalcRunning] = useState(false);
     const [showDialog, setShowDialog] = useState(false);
-    const [showIntroDialog, setShowIntroDialog] = useState(true);
+    const [showIntroDialog, setShowIntroDialog] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [loadButton, setLoadButton] = useState(true);
     const [warning, setWarning] = useState('');
 
 
     useEffect(() => {
-        
-
+        setShowIntroDialog(true);
     }, [])
 
     const loadData = () => {
@@ -74,18 +73,6 @@ const ReflectionsCalculator = () => {
 
     const handleChange = ({target}) => {
         setFormData({...formData, [target.name]: target.value})
-
-        if(target.value === '') {
-            setShowResult(false);
-        } else if (parseFloat(target.value) === 0) {
-            setShowResult(false);
-        } else if (isNaN(parseFloat(target.value))) {
-            setShowResult(false);
-        } else {
-            setShowResult(true);
-        }
-
-        console.log(formData);
     }
 
     // main logic for reflections
@@ -146,13 +133,27 @@ const ReflectionsCalculator = () => {
     }
 
     const handleButton = () => {
-        setCalcRunning(true);
-        calculateReflections(formData.personalKtyAddress);     
+        window.scrollTo({top: 500, behavior: 'smooth'})
+        if(formData.personalKtyAddress === '') {
+            setFadeIn(true);
+        } else if (formData.personalKtyAddress === '0') {
+            setFadeIn(true);
+        } else if (!formData.personalKtyAddress.startsWith('0x')) {
+            setFadeIn(true);
+        } else {
+            setCalcRunning(true);
+            calculateReflections(formData.personalKtyAddress);  
+        }   
     }
 
     const handleLoadButton = () => {
         setLoadButton(false);
         loadData();
+    }
+
+    const handleResultsButton = () => {
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        setFadeIn(false);
     }
 
     const handleDateChange = (date) => {
@@ -176,7 +177,10 @@ const ReflectionsCalculator = () => {
     // A Div for displaying result of calculation. A leftover from previous app, not sure If I'm going to use it in this app yet.
     const result = (
         <Grid container justifyContent='center'>
-            <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
+            <Card elevation={10} style={{padding: '20px', maxWidth: '800px'}}>
+                <Typography align='center'>
+                    <h4 style={{marginTop: '0px'}}><b>Your Personal Reflections:</b></h4>
+                </Typography>
                 <Typography align='center' gutterBottom>
                     {`Reflections for ${formattedDate()}: ${reflectionsForDate} KTY`}
                 </Typography>
@@ -192,24 +196,32 @@ const ReflectionsCalculator = () => {
                 <Typography align='center' gutterBottom>
                     {`Total Transcation considered: ${trxCount} Transactions`}
                 </Typography>
+                <Grid container justifyContent='center'>
+                <Button variant='contained' onClick={handleResultsButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Back To Top</Button>
+                </Grid>
             </Card>
         </Grid>
     );
 
     // A Div for displaying needed information if a user inputs wrong info. This is leftover from the previous AMP calc, not sure if I'll need this app yet.
     const notABscAddress = (
-        <Grid container justifyContent='center'>
+        <Grid container alignItems='center' justifyContent='center'>
             <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
-                <Typography>
-                    Check your entered values:
-                </Typography>
-                <Typography gutterBottom style={{paddingRight: '10px'}}>
-                    <ul>
-                        <li>All fields are required</li>
-                        <li>None of the fields can equal 0</li>
-                        <li>Fields can only contain numbers</li>
-                    </ul>
-                </Typography>
+                <Grid container direction='column' alignItems='center'>
+                    <Typography>
+                        Something is not right here:
+                    </Typography>
+                    <Typography gutterBottom style={{paddingRight: '10px'}}>
+                        <ul>
+                            <li>Check that your KTY address is correct</li>
+                            <li>KTY address start with '0x'</li>
+                            <li>Fields can only contain numbers and letters</li>
+                        </ul>
+                    </Typography>
+                    <Grid item>
+                        <Button variant='contained' onClick={handleResultsButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Back To Top</Button>
+                    </Grid>
+                </Grid>
             </Card>
         </Grid>
     );
@@ -281,19 +293,24 @@ const ReflectionsCalculator = () => {
                     </div>
                 </Fade>
                 :
-                <div style={{marginTop: '40px'}}>
-                    <Grid container justifyContent='center'>
-                        <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
-                            <Typography align='center' gutterBottom>
-                                { calcRunning ?
-                                    'CATculating Reflections...'
-                                    :
-                                    'Reflections with show here'
-                                }
-                            </Typography>
-                        </Card>
-                    </Grid>
-                </div>
+                calcRunning ?
+                <Fade in={fadeIn}>
+                    <div style={{marginTop: '40px'}}>
+                        <Grid container justifyContent='center'>
+                            <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
+                                <Typography align='center' gutterBottom>
+                                        'CATculating Reflections...'
+                                </Typography>
+                            </Card>
+                        </Grid>
+                    </div>
+                </Fade>
+                :
+                <Fade in={fadeIn}>
+                    <div style={{marginTop: '40px'}}>
+                        {notABscAddress}
+                    </div>
+                </Fade>
             }
             <div>
                 <Footer />
