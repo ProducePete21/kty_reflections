@@ -325,9 +325,13 @@ const ReflectionsCalculator = () => {
                     </div>
                 </Fade>
             }
+            { window.innerWidth > 400 ?
             <div>
                 <Footer />
             </div>
+            :
+            ''
+            }  
             <WarningDialogPopover open={showDialog} onClose={closeDialog} warning={warning} />
             <IntroPopover open={showIntroDialog} onClose={closeIntroDialog} />
         </div>
