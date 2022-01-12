@@ -38,5 +38,9 @@ I discovered that the total supply that comes from BSC scan, if I were to use th
 As the calculateReflections function runs it will also pick up on transactions where a user received/sent or bought/sold KTY and adds or subtracts from the user’s total KTY owned respectively. Just like with total supply, as KTY is added or subtracted from a user’s wallet it’s going to change the reflections they receive.
 
 <br/>
-
+<b>Current Issues:</b>
+<ul>
+<li>Having issue with the background width on mobile devices</li>
+<li>Footer is cut off on mobile devices</li>
+</ul>
 
