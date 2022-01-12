@@ -138,7 +138,7 @@ const ReflectionsCalculator = () => {
         if(window.innerWidth < 400) {
             setMaxWidth('285px');
         }
-        window.scrollTo({top: 500, behavior: 'smooth'})
+        window.scrollTo({top: 600, behavior: 'smooth'})
         if(formData.personalKtyAddress === '') {
             setFadeIn(true);
         } else if (formData.personalKtyAddress === '0') {
