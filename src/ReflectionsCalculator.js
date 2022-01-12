@@ -163,6 +163,7 @@ const ReflectionsCalculator = () => {
 
     const handleDateChange = (date) => {
         setFadeIn(false);
+        window.scrollTo({top: 0, behavior: 'smooth'});
         date.setHours(12, 0, 0);
         setFormData({...formData, date: date});
         
@@ -253,6 +254,8 @@ const ReflectionsCalculator = () => {
                                 <DatePicker 
                                     selected={formData.date}
                                     onChange={date => handleDateChange(date)}
+                                    minDate={new Date('November 06, 2021 12:00:00')}
+                                    maxDate={new Date()}
                                     peekNextMonth
                                     showMonthDropdown
                                     showYearDropdown
