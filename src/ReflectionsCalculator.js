@@ -157,8 +157,10 @@ const ReflectionsCalculator = () => {
     }
 
     const handleDateChange = (date) => {
+        setFadeIn(false);
         date.setHours(12, 0, 0);
-        setFormData({...formData, date: date})
+        setFormData({...formData, date: date});
+        
     }
 
     const formattedDate = () => {
