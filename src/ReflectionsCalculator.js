@@ -212,7 +212,7 @@ const ReflectionsCalculator = () => {
     // A Div for displaying needed information if a user inputs wrong info. This is leftover from the previous AMP calc, not sure if I'll need this app yet.
     const notABscAddress = (
         <Grid container alignItems='center' justifyContent='center'>
-            <Card elevation={10} style={{padding: '10px', maxWidth: '800px'}}>
+            <Card elevation={10} style={{padding: '10px', maxWidth: maxWidth}}>
                 <Grid container direction='column' alignItems='center'>
                     <Typography>
                         Something is not right here:
