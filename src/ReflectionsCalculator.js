@@ -30,6 +30,7 @@ const ReflectionsCalculator = () => {
     const [reflectionsForDate, setReflectionsForDate] = useState(0);
     const [currentTotalKTY, setCurrentTotalKTY] = useState(0);
     const [trxCount, setTrxCount] = useState(0);
+    const [maxWidth, setMaxWidth] = useState('800px');
     const [fadeIn, setFadeIn] = useState(false);
     const [calcRunning, setCalcRunning] = useState(false);
     const [showDialog, setShowDialog] = useState(false);
@@ -41,6 +42,7 @@ const ReflectionsCalculator = () => {
 
     useEffect(() => {
         setShowIntroDialog(true);
+        console.log(window.innerWidth)
     }, [])
 
     const loadData = () => {
@@ -133,6 +135,9 @@ const ReflectionsCalculator = () => {
     }
 
     const handleButton = () => {
+        if(window.innerWidth < 400) {
+            setMaxWidth('285px');
+        }
         window.scrollTo({top: 500, behavior: 'smooth'})
         if(formData.personalKtyAddress === '') {
             setFadeIn(true);
@@ -158,6 +163,7 @@ const ReflectionsCalculator = () => {
 
     const handleDateChange = (date) => {
         setFadeIn(false);
+        window.scrollTo({top: 0, behavior: 'smooth'});
         date.setHours(12, 0, 0);
         setFormData({...formData, date: date});
         
@@ -180,7 +186,7 @@ const ReflectionsCalculator = () => {
     // A Div for displaying result of calculation. A leftover from previous app, not sure If I'm going to use it in this app yet.
     const result = (
         <Grid container justifyContent='center'>
-            <Card elevation={10} style={{padding: '20px', maxWidth: '800px'}}>
+            <Card elevation={10} style={{padding: '20px', maxWidth: maxWidth}}>
                 <Typography align='center'>
                     <h4 style={{marginTop: '0px'}}><b>Your Personal Reflections:</b></h4>
                 </Typography>
@@ -230,12 +236,16 @@ const ReflectionsCalculator = () => {
         <div>
             <div>
                 <Grid container spacing={25} justifyContent='center' style={{flexWrap: 'nowrap', paddingTop: '50px'}}>
+                    { window.innerWidth > 400 ?
                     <Grid item>
                         <img src='kitty-and-coin_modified.png' alt='kittyLogo' />
                     </Grid>
+                    :
+                    ''
+                    }
                     <Grid item>
                         <Card elevation={10}>
-                        <Grid container spacing={2} direction='column' alignItems='center' raised style={{padding: '16px', minWidth: '250px', maxWidth: '645px', marginLeft: '0px', marginTop: '0px', width: '100%' }}>
+                        <Grid container spacing={2} direction='column' alignItems='center' raised style={{padding: '16px', minWidth: '250px', maxWidth: (window.innerWidth < 400 ? '345px' : '645px'), marginLeft: '0px', marginTop: '0px', width: '100%' }}>
                             <Typography align='center' style={{margin: '10px'}}>Use this simple calculator to help determine your KTY reflections</Typography>
                             <Typography align='center' style={{marginTop: '10px', fontWeight: 'bold'}}>Enter your public KTY Address below:</Typography>
                             <ReflectionsCalcInput name='personalKtyAddress' id='personalKtyAddress' label='KTY address' autoFocus type='text' handleChange={handleChange} />
@@ -244,6 +254,8 @@ const ReflectionsCalculator = () => {
                                 <DatePicker 
                                     selected={formData.date}
                                     onChange={date => handleDateChange(date)}
+                                    minDate={new Date('November 06, 2021 12:00:00')}
+                                    maxDate={new Date()}
                                     peekNextMonth
                                     showMonthDropdown
                                     showYearDropdown
@@ -281,9 +293,13 @@ const ReflectionsCalculator = () => {
                         </Grid>
                         </Card>
                     </Grid>
+                    { window.innerWidth > 400 ?
                     <Grid item>
                         <img src='kitty-and-coin_modified.png' alt='kittyLogo' />
                     </Grid>
+                    :
+                    ''
+                    }
                 </Grid>
             </div>
             {showResult ?
@@ -312,9 +328,13 @@ const ReflectionsCalculator = () => {
                     </div>
                 </Fade>
             }
+            { window.innerWidth > 400 ?
             <div>
                 <Footer />
             </div>
+            :
+            ''
+            }  
             <WarningDialogPopover open={showDialog} onClose={closeDialog} warning={warning} />
             <IntroPopover open={showIntroDialog} onClose={closeIntroDialog} />
         </div>
