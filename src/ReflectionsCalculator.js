@@ -70,7 +70,7 @@ const ReflectionsCalculator = () => {
                 .catch(error => console.log(error));
 
             // call to API to find a user KTY balance
-            await fetch(`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&address=0x97c9842be0e29171803d25cb5b60e838ac462079&tag=latest&apikey=${process.env.REACT_APP_BSC_KEY}`)
+            await fetch(`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&address=${formData.personalKtyAddress}&tag=latest&apikey=${process.env.REACT_APP_BSC_KEY}`)
                 .then(res => res.json())
                 .then(data => {
                     setCurrentTotalKTY((data.result * decimalConst).toFixed(9));
@@ -113,16 +113,10 @@ const ReflectionsCalculator = () => {
                 } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
                         ktyAddsAndSubs = ktyAddsAndSubs + (trx.value * decimalConst);
-                        console.log(parseFloat(currentTotalKTY));
-                        console.log(ktyAddsAndSubs);
                 // Check for trx sent from (sending or selling) user's wallet and subtracts value from personalKtyAmount
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount - ((trx.value * decimalConst) / 0.96 );
                         ktyAddsAndSubs = ktyAddsAndSubs - ((trx.value * decimalConst) / 0.96 );
-                        console.log(ktyAddsAndSubs);
-                // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
-                } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
-                        personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
                 // Checks for trx that is reflections eligible and runs reflections math
                 } else if(trx.value !== 0 && !trx.to.startsWith('0x000000000000000000000') && !trx.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !trx.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
                         const ownershipPercentage = personalKtyAmount / totalSupply;
@@ -154,7 +148,7 @@ const ReflectionsCalculator = () => {
     }
 
 
-    const handleButton = () => {
+    const handleButton = async () => {
         if(window.innerWidth < 400) {
             setMaxWidth('285px');
         }
@@ -172,8 +166,20 @@ const ReflectionsCalculator = () => {
     }
 
     const handleLoadButton = () => {
-        setLoadButton(false);
-        loadData();
+        if(formData.personalKtyAddress === '') {
+            setWarning('Please enter a valid KTY address to load the data');
+            setShowDialog(true);
+        } else if (formData.personalKtyAddress === '0') {
+            setWarning('Please enter a valid KTY address to load the data');
+            setShowDialog(true);
+        } else if (!formData.personalKtyAddress.startsWith('0x')) {
+            setWarning('Please enter a valid KTY address to load the data');
+            setShowDialog(true);
+        } else {
+            setLoadButton(false);
+            loadData(); 
+        } 
+        
     }
 
     const handleResultsButton = () => {
