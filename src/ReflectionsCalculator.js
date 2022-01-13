@@ -68,6 +68,14 @@ const ReflectionsCalculator = () => {
                     setTrxDataLoaded(true);
                 })
                 .catch(error => console.log(error));
+
+            // call to API to find a user KTY balance
+            await fetch(`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&address=0x97c9842be0e29171803d25cb5b60e838ac462079&tag=latest&apikey=${process.env.REACT_APP_BSC_KEY}`)
+                .then(res => res.json())
+                .then(data => {
+                    setCurrentTotalKTY((data.result * decimalConst).toFixed(9));
+                })
+                .catch(error => console.log(error));
         }
 
         fetchingData();
@@ -84,6 +92,7 @@ const ReflectionsCalculator = () => {
         allTrx.push(trxData2);
         let totalSupply = 69420000000000;
         let fullTotalSupply = 69420000000000;
+        let ktyAddsAndSubs = 0;
         let personalKtyAmount = 0;
         let reflectionsForChosenDay = 0;
         let totalReflections = 0;
@@ -103,9 +112,14 @@ const ReflectionsCalculator = () => {
                 // Checks for trx sent to user's wallet (receiving or buying) and adds value to personalKtyAmount         
                 } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
+                        ktyAddsAndSubs = ktyAddsAndSubs + (trx.value * decimalConst);
+                        console.log(parseFloat(currentTotalKTY));
+                        console.log(ktyAddsAndSubs);
                 // Check for trx sent from (sending or selling) user's wallet and subtracts value from personalKtyAmount
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount - ((trx.value * decimalConst) / 0.96 );
+                        ktyAddsAndSubs = ktyAddsAndSubs - ((trx.value * decimalConst) / 0.96 );
+                        console.log(ktyAddsAndSubs);
                 // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
@@ -131,13 +145,14 @@ const ReflectionsCalculator = () => {
         
         const formatNumber = new Intl.NumberFormat('en-US');
         setReflectionsForDate(formatNumber.format(reflectionsForChosenDay.toFixed(2)));
-        setTotalReflections(formatNumber.format(totalReflections.toFixed(2)));
-        setCurrentTotalKTY(formatNumber.format(personalKtyAmount.toFixed(2)));
+        setTotalReflections(formatNumber.format((parseFloat(currentTotalKTY) - ktyAddsAndSubs).toFixed(2)));
+        setCurrentTotalKTY(formatNumber.format(parseFloat(currentTotalKTY).toFixed(2)));
         setFullTotalSupply(formatNumber.format(fullTotalSupply));
         setTrxCount(formatNumber.format(trxCount));
         setShowResult(true);
         setFadeIn(true);
     }
+
 
     const handleButton = () => {
         if(window.innerWidth < 400) {
@@ -200,6 +215,9 @@ const ReflectionsCalculator = () => {
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Total Received Reflections: ${totalReflections} KTY`}
+                </Typography>
+                <Typography align='center' gutterBottom>
+                    {`Current Total KTY Balance: ${currentTotalKTY} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Current Total Supply: ${fullTotalSupply} KTY`}
