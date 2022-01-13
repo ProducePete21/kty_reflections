@@ -42,7 +42,6 @@ const ReflectionsCalculator = () => {
 
     useEffect(() => {
         setShowIntroDialog(true);
-        console.log(window.innerWidth)
     }, [])
 
     const loadData = () => {
@@ -68,6 +67,14 @@ const ReflectionsCalculator = () => {
                     setTrxDataLoaded(true);
                 })
                 .catch(error => console.log(error));
+
+            // call to API to find a user KTY balance
+            await fetch(`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&address=${formData.personalKtyAddress}&tag=latest&apikey=${process.env.REACT_APP_BSC_KEY}`)
+                .then(res => res.json())
+                .then(data => {
+                    setCurrentTotalKTY((data.result * decimalConst).toFixed(9));
+                })
+                .catch(error => console.log(error));
         }
 
         fetchingData();
@@ -79,11 +86,11 @@ const ReflectionsCalculator = () => {
 
     // main logic for reflections
     const calculateReflections = (personalKtyAddress) => {
-        console.log(fadeIn);
         allTrx.push(trxData);
         allTrx.push(trxData2);
         let totalSupply = 69420000000000;
         let fullTotalSupply = 69420000000000;
+        let ktyAddsAndSubs = 0;
         let personalKtyAmount = 0;
         let reflectionsForChosenDay = 0;
         let totalReflections = 0;
@@ -103,12 +110,11 @@ const ReflectionsCalculator = () => {
                 // Checks for trx sent to user's wallet (receiving or buying) and adds value to personalKtyAmount         
                 } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
+                        ktyAddsAndSubs = ktyAddsAndSubs + (trx.value * decimalConst);
                 // Check for trx sent from (sending or selling) user's wallet and subtracts value from personalKtyAmount
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
                         personalKtyAmount = personalKtyAmount - ((trx.value * decimalConst) / 0.96 );
-                // Checks for trx sent from user's wallet subtract value from personalKtyAmount 
-                } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
-                        personalKtyAmount = personalKtyAmount - (trx.value * decimalConst);
+                        ktyAddsAndSubs = ktyAddsAndSubs - ((trx.value * decimalConst) / 0.96 );
                 // Checks for trx that is reflections eligible and runs reflections math
                 } else if(trx.value !== 0 && !trx.to.startsWith('0x000000000000000000000') && !trx.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !trx.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
                         const ownershipPercentage = personalKtyAmount / totalSupply;
@@ -131,15 +137,16 @@ const ReflectionsCalculator = () => {
         
         const formatNumber = new Intl.NumberFormat('en-US');
         setReflectionsForDate(formatNumber.format(reflectionsForChosenDay.toFixed(2)));
-        setTotalReflections(formatNumber.format(totalReflections.toFixed(2)));
-        setCurrentTotalKTY(formatNumber.format(personalKtyAmount.toFixed(2)));
+        setTotalReflections(formatNumber.format((parseFloat(currentTotalKTY) - ktyAddsAndSubs).toFixed(2)));
+        setCurrentTotalKTY(formatNumber.format(parseFloat(currentTotalKTY).toFixed(2)));
         setFullTotalSupply(formatNumber.format(fullTotalSupply));
         setTrxCount(formatNumber.format(trxCount));
         setShowResult(true);
         setFadeIn(true);
     }
 
-    const handleButton = () => {
+
+    const handleButton = async () => {
         if(window.innerWidth < 400) {
             setMaxWidth('285px');
         }
@@ -157,8 +164,20 @@ const ReflectionsCalculator = () => {
     }
 
     const handleLoadButton = () => {
-        setLoadButton(false);
-        loadData();
+        if(formData.personalKtyAddress === '') {
+            setWarning('Please enter a valid KTY address to load the data');
+            setShowDialog(true);
+        } else if (formData.personalKtyAddress === '0') {
+            setWarning('Please enter a valid KTY address to load the data');
+            setShowDialog(true);
+        } else if (!formData.personalKtyAddress.startsWith('0x')) {
+            setWarning('Please enter a valid KTY address to load the data');
+            setShowDialog(true);
+        } else {
+            setLoadButton(false);
+            loadData(); 
+        } 
+        
     }
 
     const handleResultsButton = () => {
@@ -200,6 +219,9 @@ const ReflectionsCalculator = () => {
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Total Received Reflections: ${totalReflections} KTY`}
+                </Typography>
+                <Typography align='center' gutterBottom>
+                    {`Current Total KTY Balance: ${currentTotalKTY} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Current Total Supply: ${fullTotalSupply} KTY`}
