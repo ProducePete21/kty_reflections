@@ -42,7 +42,6 @@ const ReflectionsCalculator = () => {
 
     useEffect(() => {
         setShowIntroDialog(true);
-        console.log(window.innerWidth)
     }, [])
 
     const loadData = () => {
@@ -87,7 +86,6 @@ const ReflectionsCalculator = () => {
 
     // main logic for reflections
     const calculateReflections = (personalKtyAddress) => {
-        console.log(fadeIn);
         allTrx.push(trxData);
         allTrx.push(trxData2);
         let totalSupply = 69420000000000;
