@@ -9,6 +9,8 @@ import WarningDialogPopover from './WarningDialogPopover';
 import IntroPopover from './IntroPopover';
 import Loading from './Loading';
 
+import Big from 'big.js';
+
 import 'react-datepicker/dist/react-datepicker.css';
 
 const initialState = {
@@ -16,7 +18,7 @@ const initialState = {
     date: new Date(),
 }
 
-const decimalConst = 0.000000001;
+const decimalConst = new Big(0.000000001);
 const timeStampConst = 1000;
 
 const ReflectionsCalculator = () => {
@@ -88,12 +90,12 @@ const ReflectionsCalculator = () => {
     const calculateReflections = (personalKtyAddress) => {
         allTrx.push(trxData);
         allTrx.push(trxData2);
-        let totalSupply = 69420000000000;
-        let fullTotalSupply = 69420000000000;
-        let ktyAddsAndSubs = 0;
-        let personalKtyAmount = 0;
-        let reflectionsForChosenDay = 0;
-        let totalReflections = 0;
+        let totalSupply = new Big(69420000000000);
+        let fullTotalSupply = new Big(69420000000000);
+        let ktyAddsAndSubs = new Big(0);
+        let personalKtyAmount = new Big(0);
+        let reflectionsForChosenDay = new Big(0);
+        let totalReflections = new Big(0);
         // +1 every loop to assure that my logic is counting the correct number of transactions
         let trxCount = 0;
 
@@ -102,34 +104,54 @@ const ReflectionsCalculator = () => {
             trxArray.forEach(trx => {
                 // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply to be display   
                 if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0) {
-                    fullTotalSupply = fullTotalSupply - (trx.value * decimalConst);      
+                    let trxValue = new Big(trx.value);
+                    let newValue = trxValue.times(decimalConst);
+                    fullTotalSupply = fullTotalSupply.minus((newValue));     
                 } 
                 // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply to used for reflections math
                 if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0 && !trx.to.endsWith('dead')) {
-                        totalSupply = totalSupply - (trx.value * decimalConst);
+                    // totalSupply = totalSupply - (trx.value * decimalConst);
+                    let trxValue = new Big(trx.value);
+                    let newValue = trxValue.times(decimalConst);
+                    totalSupply = totalSupply.minus((newValue));
+                    console.log(totalSupply.toFixed(9));  
                 // Checks for trx sent to user's wallet (receiving or buying) and adds value to personalKtyAmount         
                 } else if(trx.to.startsWith(personalKtyAddress.toLowerCase())) {
-                        personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
-                        ktyAddsAndSubs = ktyAddsAndSubs + (trx.value * decimalConst);
+                    // personalKtyAmount = personalKtyAmount + (trx.value * decimalConst);
+                    // ktyAddsAndSubs = ktyAddsAndSubs + (trx.value * decimalConst);
+                    let trxValue = new Big(trx.value);
+                    let newValue = trxValue.times(decimalConst);
+                    personalKtyAmount = personalKtyAmount.plus(newValue);
+                    ktyAddsAndSubs = ktyAddsAndSubs.plus(newValue);
                 // Check for trx sent from (sending or selling) user's wallet and subtracts value from personalKtyAmount
                 } else if(trx.from.startsWith(personalKtyAddress.toLowerCase())) {
-                        personalKtyAmount = personalKtyAmount - ((trx.value * decimalConst) / 0.96 );
-                        ktyAddsAndSubs = ktyAddsAndSubs - ((trx.value * decimalConst) / 0.96 );
+                    personalKtyAmount = personalKtyAmount - ((trx.value * decimalConst) / 0.96 );
+                    ktyAddsAndSubs = ktyAddsAndSubs - ((trx.value * decimalConst) / 0.96 );
+                    let trxValue = new Big(trx.value);
+                    let newValue = trxValue.times(decimalConst).div(0.96);
+                    personalKtyAmount = personalKtyAmount.minus(newValue);
+                    ktyAddsAndSubs = ktyAddsAndSubs.minus(newValue);
                 // Checks for trx that is reflections eligible and runs reflections math
                 } else if(trx.value !== 0 && !trx.to.startsWith('0x000000000000000000000') && !trx.from.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1') && !trx.to.startsWith('0x364c69b3da660d6e534a11dc77cd4d0d510179e1')) {
-                        const ownershipPercentage = personalKtyAmount / totalSupply;
+                        // const ownershipPercentage = personalKtyAmount / totalSupply;
+                        const ownershipPercentage = personalKtyAmount.div(totalSupply);
                     
                         // 3.125% is used because the transaction value from bsc scan is 96% of the actual transaction amount. It's the amount transferred after the 4% burn and reflection tax.
-                        const elementReflection = ((trx.value * decimalConst) * 0.03125) * ownershipPercentage;
+                        // const elementReflection = ((trx.value * decimalConst) * 0.03125) * ownershipPercentage;
+                        let trxValue = new Big(trx.value);
+                        let newValue = trxValue.times(decimalConst);
+                        const elementReflection = newValue.times(0.03125).times(ownershipPercentage);
                 
-                        personalKtyAmount = personalKtyAmount + elementReflection;
-                        totalReflections = totalReflections + elementReflection;
+                        // personalKtyAmount = personalKtyAmount + elementReflection;
+                        personalKtyAmount = personalKtyAmount.plus(elementReflection);
+                        // totalReflections = totalReflections + elementReflection;
+                        totalReflections = totalReflections.plus(elementReflection);
                         
                         const elementDate = new Date(trx.timeStamp * timeStampConst);
 
                         // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
                         if(elementDate.getUTCMonth() === formData.date.getUTCMonth() && elementDate.getUTCDate() === formData.date.getUTCDate() && elementDate.getUTCFullYear() === formData.date.getUTCFullYear()) {
-                            reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
+                            reflectionsForChosenDay = reflectionsForChosenDay.plus(elementReflection);
                         }
                 }
                 trxCount++;
@@ -137,9 +159,11 @@ const ReflectionsCalculator = () => {
         
         const formatNumber = new Intl.NumberFormat('en-US');
         setReflectionsForDate(formatNumber.format(reflectionsForChosenDay.toFixed(2)));
-        setTotalReflections(formatNumber.format((parseFloat(currentTotalKTY) - ktyAddsAndSubs).toFixed(2)));
-        setCurrentTotalKTY(formatNumber.format(parseFloat(currentTotalKTY).toFixed(2)));
-        setFullTotalSupply(formatNumber.format(fullTotalSupply));
+        // setTotalReflections(formatNumber.format((parseFloat(currentTotalKTY) - ktyAddsAndSubs).toFixed(2)));
+        // setCurrentTotalKTY(formatNumber.format(parseFloat(currentTotalKTY).toFixed(2)));
+        setTotalReflections(formatNumber.format(totalReflections));
+        setCurrentTotalKTY(formatNumber.format(personalKtyAmount));
+        setFullTotalSupply(formatNumber.format(totalSupply));
         setTrxCount(formatNumber.format(trxCount));
         setShowResult(true);
         setFadeIn(true);
