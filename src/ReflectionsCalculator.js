@@ -25,6 +25,7 @@ const ReflectionsCalculator = () => {
     const [trxData2, setTrxData2] = useState([]);
     let allTrx = [];
     const [trxDataLoaded, setTrxDataLoaded] = useState(false);
+    const [totalDeadBurns, setTotalDeadBurns] = useState(0);
     const [fullTotalSupply, setFullTotalSupply] = useState(69420000000000);
     const [totalReflections, setTotalReflections] = useState(0);
     const [reflectionsForDate, setReflectionsForDate] = useState(0);
@@ -73,6 +74,13 @@ const ReflectionsCalculator = () => {
                 .then(res => res.json())
                 .then(data => {
                     setCurrentTotalKTY((data.result * decimalConst).toFixed(9));
+                })
+                .catch(error => console.log(error));
+
+            await fetch(`https://api.bscscan.com/api?module=account&action=tokenbalance&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&address=0x000000000000000000000000000000000000dead&tag=latest&apikey=${process.env.REACT_APP_BSC_KEY}`)
+                .then(res => res.json())
+                .then(data => {
+                    setTotalDeadBurns((data.result * decimalConst).toFixed(9));
                 })
                 .catch(error => console.log(error));
         }
@@ -139,7 +147,7 @@ const ReflectionsCalculator = () => {
         setReflectionsForDate(formatNumber.format(reflectionsForChosenDay.toFixed(2)));
         setTotalReflections(formatNumber.format((parseFloat(currentTotalKTY) - ktyAddsAndSubs).toFixed(2)));
         setCurrentTotalKTY(formatNumber.format(parseFloat(currentTotalKTY).toFixed(2)));
-        setFullTotalSupply(formatNumber.format(fullTotalSupply));
+        setFullTotalSupply(formatNumber.format((totalSupply - totalDeadBurns).toFixed(2)));
         setTrxCount(formatNumber.format(trxCount));
         setShowResult(true);
         setFadeIn(true);
