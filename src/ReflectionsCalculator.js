@@ -16,6 +16,7 @@ const initialState = {
     date: new Date(),
 }
 
+const formatNumber = new Intl.NumberFormat('en-US');
 const decimalConst = 0.000000001;
 const timeStampConst = 1000;
 
@@ -43,6 +44,7 @@ const ReflectionsCalculator = () => {
 
     useEffect(() => {
         setShowIntroDialog(true);
+        formData.date.setHours(12, 0, 0);
     }, [])
 
     const loadData = () => {
@@ -134,19 +136,18 @@ const ReflectionsCalculator = () => {
                         totalReflections = totalReflections + elementReflection;
                         
                         const elementDate = new Date(trx.timeStamp * timeStampConst);
-
+                        
                         // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
                         if(elementDate.getUTCMonth() === formData.date.getUTCMonth() && elementDate.getUTCDate() === formData.date.getUTCDate() && elementDate.getUTCFullYear() === formData.date.getUTCFullYear()) {
                             reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
+                            console.log(reflectionsForChosenDay);
                         }
                 }
                 trxCount++;
         })})
         
-        const formatNumber = new Intl.NumberFormat('en-US');
         setReflectionsForDate(formatNumber.format(reflectionsForChosenDay.toFixed(2)));
-        setTotalReflections(formatNumber.format((parseFloat(currentTotalKTY) - ktyAddsAndSubs).toFixed(2)));
-        setCurrentTotalKTY(formatNumber.format(parseFloat(currentTotalKTY).toFixed(2)));
+        setTotalReflections((parseFloat(currentTotalKTY) - ktyAddsAndSubs));
         setFullTotalSupply(formatNumber.format((totalSupply - totalDeadBurns).toFixed(2)));
         setTrxCount(formatNumber.format(trxCount));
         setShowResult(true);
@@ -194,6 +195,7 @@ const ReflectionsCalculator = () => {
     }
 
     const handleDateChange = (date) => {
+        console.log(`${date.getMonth()} ${date.getDate()}, ${date.getFullYear()}`)
         setFadeIn(false);
         window.scrollTo({top: 0, behavior: 'smooth'});
         date.setHours(12, 0, 0);
@@ -226,16 +228,16 @@ const ReflectionsCalculator = () => {
                     {`Reflections for ${formattedDate()}: ${reflectionsForDate} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Total Received Reflections: ${totalReflections} KTY`}
+                    {`Total Received Reflections: ${formatNumber.format(totalReflections)} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Current Total KTY Balance: ${currentTotalKTY} KTY`}
+                    {`Current Total KTY Balance: ${formatNumber.format(currentTotalKTY)} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Current Total Supply: ${fullTotalSupply} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Total Transcation considered: ${trxCount} Transactions`}
+                    {`Total Transcations Considered: ${trxCount} Transactions`}
                 </Typography>
                 <Grid container justifyContent='center'>
                 <Button variant='contained' onClick={handleResultsButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Back To Top</Button>
