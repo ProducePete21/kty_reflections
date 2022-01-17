@@ -140,7 +140,6 @@ const ReflectionsCalculator = () => {
                         // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
                         if(elementDate.getUTCMonth() === formData.date.getUTCMonth() && elementDate.getUTCDate() === formData.date.getUTCDate() && elementDate.getUTCFullYear() === formData.date.getUTCFullYear()) {
                             reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
-                            console.log(reflectionsForChosenDay);
                         }
                 }
                 trxCount++;
@@ -195,7 +194,6 @@ const ReflectionsCalculator = () => {
     }
 
     const handleDateChange = (date) => {
-        console.log(`${date.getMonth()} ${date.getDate()}, ${date.getFullYear()}`)
         setFadeIn(false);
         window.scrollTo({top: 0, behavior: 'smooth'});
         date.setHours(12, 0, 0);
