@@ -16,6 +16,7 @@ const initialState = {
     date: new Date(),
 }
 
+const formatNumber = new Intl.NumberFormat('en-US');
 const decimalConst = 0.000000001;
 const timeStampConst = 1000;
 
@@ -43,7 +44,9 @@ const ReflectionsCalculator = () => {
 
     useEffect(() => {
         setShowIntroDialog(true);
-    }, [])
+    }, [
+
+    ])
 
     const loadData = () => {
         let blockNum;
@@ -143,10 +146,8 @@ const ReflectionsCalculator = () => {
                 trxCount++;
         })})
         
-        const formatNumber = new Intl.NumberFormat('en-US');
         setReflectionsForDate(formatNumber.format(reflectionsForChosenDay.toFixed(2)));
-        setTotalReflections(formatNumber.format((parseFloat(currentTotalKTY) - ktyAddsAndSubs).toFixed(2)));
-        setCurrentTotalKTY(formatNumber.format(parseFloat(currentTotalKTY).toFixed(2)));
+        setTotalReflections((parseFloat(currentTotalKTY) - ktyAddsAndSubs));
         setFullTotalSupply(formatNumber.format((totalSupply - totalDeadBurns).toFixed(2)));
         setTrxCount(formatNumber.format(trxCount));
         setShowResult(true);
@@ -226,10 +227,10 @@ const ReflectionsCalculator = () => {
                     {`Reflections for ${formattedDate()}: ${reflectionsForDate} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Total Received Reflections: ${totalReflections} KTY`}
+                    {`Total Received Reflections: ${formatNumber.format(totalReflections)} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Current Total KTY Balance: ${currentTotalKTY} KTY`}
+                    {`Current Total KTY Balance: ${formatNumber.format(currentTotalKTY)} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Current Total Supply: ${fullTotalSupply} KTY`}
