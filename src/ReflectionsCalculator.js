@@ -21,10 +21,12 @@ const decimalConst = 0.000000001;
 const timeStampConst = 1000;
 
 const ReflectionsCalculator = () => {
+    let allTrx = [];
+    const [startDate, setStartDate] = useState(new Date());
+    const [endDate, setEndDate] = useState(null);
     const [formData, setFormData] = useState(initialState);
     const [trxData, setTrxData] = useState([]);
     const [trxData2, setTrxData2] = useState([]);
-    let allTrx = [];
     const [trxDataLoaded, setTrxDataLoaded] = useState(false);
     const [totalDeadBurns, setTotalDeadBurns] = useState(0);
     const [fullTotalSupply, setFullTotalSupply] = useState(69420000000000);
@@ -193,11 +195,15 @@ const ReflectionsCalculator = () => {
         setFadeIn(false);
     }
 
-    const handleDateChange = (date) => {
+    const handleDateChange = (dates) => {
+        console.log(dates);
+        const [start, end] = dates;
+        setStartDate(start);
+        setEndDate(end);
         setFadeIn(false);
         window.scrollTo({top: 0, behavior: 'smooth'});
-        date.setHours(12, 0, 0);
-        setFormData({...formData, date: date});
+        start.setHours(12, 0, 0);
+        setFormData({...formData, date: start});
         
     }
 
@@ -288,13 +294,16 @@ const ReflectionsCalculator = () => {
                             <Grid item style={{marginTop: '10px', paddingLeft: '0px', paddingTop: '10px'}}>
                                 <DatePicker 
                                     selected={formData.date}
-                                    onChange={date => handleDateChange(date)}
+                                    onChange={handleDateChange}
                                     minDate={new Date('November 06, 2021 12:00:00')}
                                     maxDate={new Date()}
+                                    startDate={startDate}
+                                    endDate={endDate}
                                     peekNextMonth
                                     showMonthDropdown
                                     showYearDropdown
                                     dropdownMode='select'
+                                    selectsRange
                                     inline
                                 />
                             </Grid>
