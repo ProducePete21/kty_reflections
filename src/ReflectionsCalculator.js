@@ -24,6 +24,7 @@ const ReflectionsCalculator = () => {
     let allTrx = [];
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(null);
+    const [dateRangeTimes, setDateRangeTimes] = useState([]);
     const [formData, setFormData] = useState(initialState);
     const [trxData, setTrxData] = useState([]);
     const [trxData2, setTrxData2] = useState([]);
@@ -46,7 +47,7 @@ const ReflectionsCalculator = () => {
 
     useEffect(() => {
         setShowIntroDialog(true);
-        formData.date.setHours(12, 0, 0);
+        startDate.setHours(12, 0, 0);
     }, [])
 
     const loadData = () => {
@@ -140,7 +141,7 @@ const ReflectionsCalculator = () => {
                         const elementDate = new Date(trx.timeStamp * timeStampConst);
                         
                         // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
-                        if(elementDate.getUTCMonth() === formData.date.getUTCMonth() && elementDate.getUTCDate() === formData.date.getUTCDate() && elementDate.getUTCFullYear() === formData.date.getUTCFullYear()) {
+                        if(elementDate.getUTCMonth() === startDate.getUTCMonth() && elementDate.getUTCDate() === startDate.getUTCDate() && elementDate.getUTCFullYear() === startDate.getUTCFullYear()) {
                             reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
                         }
                 }
@@ -196,21 +197,35 @@ const ReflectionsCalculator = () => {
     }
 
     const handleDateChange = (dates) => {
-        console.log(dates);
         const [start, end] = dates;
-        setStartDate(start);
-        setEndDate(end);
-        setFadeIn(false);
-        window.scrollTo({top: 0, behavior: 'smooth'});
-        start.setHours(12, 0, 0);
-        setFormData({...formData, date: start});
+        if(end === null) {
+            console.log('It is null yo');
+            setFadeIn(false);
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            start.setHours(12, 0, 0);
+            setStartDate(start);
+            setEndDate(end);
+        } else {
+            console.log('There is an end date');
+            start.setHours(0, 0, 0);
+            end.setHours(23, 59, 59);
+            setDateRangeTimes([start.getTime(), end.getTime()])
+            setFadeIn(false);
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            start.setHours(12, 0, 0);
+            setStartDate(start);
+            setEndDate(end);
+        }
+
+        
+        
         
     }
 
     const formattedDate = () => {
         const options = { month: 'short' };
-        const monthName = new Intl.DateTimeFormat('en-US', options).format(formData.date);
-        return `${monthName} ${formData.date.getDate()}, ${formData.date.getFullYear()}`;
+        const monthName = new Intl.DateTimeFormat('en-US', options).format(startDate);
+        return `${monthName} ${startDate.getDate()}, ${startDate.getFullYear()}`;
     }
 
     const closeDialog = () => {
@@ -293,7 +308,7 @@ const ReflectionsCalculator = () => {
                             <Typography align='center' style={{marginTop: '30px', fontWeight: 'bold'}}>Select a date from the calendar:</Typography>
                             <Grid item style={{marginTop: '10px', paddingLeft: '0px', paddingTop: '10px'}}>
                                 <DatePicker 
-                                    selected={formData.date}
+                                    selected={startDate}
                                     onChange={handleDateChange}
                                     minDate={new Date('November 06, 2021 12:00:00')}
                                     maxDate={new Date()}
