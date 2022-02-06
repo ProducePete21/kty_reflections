@@ -19,6 +19,7 @@ const initialState = {
 const formatNumber = new Intl.NumberFormat('en-US');
 const decimalConst = 0.000000001;
 const timeStampConst = 1000;
+let dates = [];
 
 const ReflectionsCalculator = () => {
     let allTrx = [];
@@ -196,8 +197,9 @@ const ReflectionsCalculator = () => {
         setFadeIn(false);
     }
 
-    const handleDateChange = (dates) => {
-        const [start, end] = dates;
+    const handleDateChange = (dateRange) => {
+        dates = [];
+        const [start, end] = dateRange;
         if(end === null) {
             console.log('It is null yo');
             setFadeIn(false);
@@ -215,11 +217,9 @@ const ReflectionsCalculator = () => {
             start.setHours(12, 0, 0);
             setStartDate(start);
             setEndDate(end);
+            allDates(start, end);
         }
 
-        
-        
-        
     }
 
     const formattedDate = () => {
@@ -235,6 +235,20 @@ const ReflectionsCalculator = () => {
     const closeIntroDialog = () => {
         setShowIntroDialog(false);
     }
+
+    const allDates = (start, end) => {
+        let startDate = new Date(start.getTime());
+        const timeDifference = end.getTime() - start.getTime();
+        const numberOfDays = Math.floor(timeDifference / (1000 * 3600 * 24)) + 1;
+
+        for(let i=0; i<numberOfDays; i++) {
+            const newDate = startDate.getTime() + (86400000 * i);
+            dates.push(new Date(newDate)); 
+        }
+
+        console.log(dates);
+
+    } 
     
     // A Div for displaying result of calculation. A leftover from previous app, not sure If I'm going to use it in this app yet.
     const result = (
