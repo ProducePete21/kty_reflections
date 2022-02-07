@@ -418,7 +418,7 @@ const ReflectionsCalculator = () => {
                             <Typography align='center' style={{margin: '10px'}}>Use this simple calculator to help determine your KTY reflections</Typography>
                             <Typography align='center' style={{marginTop: '10px', fontWeight: 'bold'}}>Enter your public KTY Address below:</Typography>
                             <ReflectionsCalcInput name='personalKtyAddress' id='personalKtyAddress' label='KTY address' autoFocus type='text' handleChange={handleChange} />
-                            <Typography align='center' style={{marginTop: '30px', fontWeight: 'bold'}}>Select a date from the calendar:</Typography>
+                            <Typography align='center' style={{marginTop: '30px', fontWeight: 'bold'}}>Select a date (or date range) from the calendar:</Typography>
                             <Grid item style={{marginTop: '10px', paddingLeft: '0px', paddingTop: '10px'}}>
                                 <DatePicker 
                                     selected={startDate}
