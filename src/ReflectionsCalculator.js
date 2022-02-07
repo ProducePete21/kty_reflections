@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import DatePicker from 'react-datepicker';
+import DataTable, { defaultThemes } from 'react-data-table-component';
 
 import { Grid, Typography, Card, Button, Fade } from '@mui/material';
 
@@ -16,10 +17,57 @@ const initialState = {
     date: new Date(),
 }
 
+const columns = [
+    {
+        name: 'Date',
+        selector: 'date',
+        sortable: true
+      },
+      {
+        name: 'Reflections For Day',
+        selector: 'reflectionsForDay',
+        sortable: true
+      },
+  ];
+
+  const customStyles = {
+    header: {
+      style: {
+        minHeight: '56px',
+      },
+    },
+    headRow: {
+      style: {
+        borderTopStyle: 'solid',
+        borderTopWidth: '1px',
+        borderTopColor: defaultThemes.default.divider.default,
+      },
+    },
+    headCells: {
+      style: {
+        '&:not(:last-of-type)': {
+          borderRightStyle: 'solid',
+          borderRightWidth: '1px',
+          borderRightColor: defaultThemes.default.divider.default,
+        },
+      },
+    },
+    cells: {
+      style: {
+        '&:not(:last-of-type)': {
+          borderRightStyle: 'solid',
+          borderRightWidth: '1px',
+          borderRightColor: defaultThemes.default.divider.default,
+        },
+      },
+    },
+  };
+
 const formatNumber = new Intl.NumberFormat('en-US');
 const decimalConst = 0.000000001;
 const timeStampConst = 1000;
 let dates = [];
+let dataTableArray = [];
 
 const ReflectionsCalculator = () => {
     let allTrx = [];
@@ -113,7 +161,7 @@ const ReflectionsCalculator = () => {
 
         // iterates through each set of 10000 transactions in order
         allTrx.forEach(trxArray => {
-            trxArray.forEach(trx => {
+            trxArray.forEach((trx, index) => {
                 // Checks for trx sent the burn address and subtracts the value of that transaction from the total supply to be display   
                 if(trx.to.startsWith('0x000000000000000000000000000') && trx.value !== 0) {
                     fullTotalSupply = fullTotalSupply - (trx.value * decimalConst);      
@@ -140,10 +188,33 @@ const ReflectionsCalculator = () => {
                         totalReflections = totalReflections + elementReflection;
                         
                         const elementDate = new Date(trx.timeStamp * timeStampConst);
-                        
-                        // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
-                        if(elementDate.getUTCMonth() === startDate.getUTCMonth() && elementDate.getUTCDate() === startDate.getUTCDate() && elementDate.getUTCFullYear() === startDate.getUTCFullYear()) {
-                            reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
+                        const nextElementDate = index+1 < trxArray.length ? new Date(trxArray[index+1].timeStamp * timeStampConst) : elementDate;
+
+                        if(dates.length > 0) {
+                            for(let i=0; i<dates.length; i++) {
+                                if(elementDate.getUTCMonth() === dates[i].getUTCMonth() && elementDate.getUTCDate() === dates[i].getUTCDate() && elementDate.getUTCFullYear() === dates[i].getUTCFullYear()) {
+                                    reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
+                                    
+                                    if(dates[i].getUTCDate() !== nextElementDate.getUTCDate()) {
+                                        const reflectionsObj = {
+                                            date: `${dates[i].getUTCMonth()+1}/${dates[i].getUTCDate()}/${dates[i].getUTCFullYear()}`,
+                                            reflectionsForDay: formatNumber.format(reflectionsForChosenDay.toFixed(2)),
+                                        }
+
+                                        dataTableArray.push(reflectionsObj);
+
+                                        reflectionsForChosenDay = 0;
+                                    }
+
+                                    break;
+                                }
+                            }
+
+                        } else {            
+                            // compares trx date with user chosen date. If they match the trx's reflections are added to reflectionsForChosenDay 
+                            if(elementDate.getUTCMonth() === startDate.getUTCMonth() && elementDate.getUTCDate() === startDate.getUTCDate() && elementDate.getUTCFullYear() === startDate.getUTCFullYear()) {
+                                reflectionsForChosenDay = reflectionsForChosenDay + elementReflection;
+                            }
                         }
                 }
                 trxCount++;
@@ -246,8 +317,6 @@ const ReflectionsCalculator = () => {
             dates.push(new Date(newDate)); 
         }
 
-        console.log(dates);
-
     } 
     
     // A Div for displaying result of calculation. A leftover from previous app, not sure If I'm going to use it in this app yet.
@@ -278,6 +347,35 @@ const ReflectionsCalculator = () => {
             </Card>
         </Grid>
     );
+
+    const dateRangeResult = (
+        <Grid container justifyContent='center'>
+            <Card elevation={10} style={{padding: '20px', maxWidth: maxWidth}}>
+                <DataTable 
+                    title='Daily Reflections'
+                    columns={columns}
+                    data={dataTableArray}
+                    striped
+                    customStyles={customStyles}
+                />
+                <Typography align='center' gutterBottom>
+                    {`Total Received Reflections: ${formatNumber.format(totalReflections)} KTY`}
+                </Typography>
+                <Typography align='center' gutterBottom>
+                    {`Current Total KTY Balance: ${formatNumber.format(currentTotalKTY)} KTY`}
+                </Typography>
+                <Typography align='center' gutterBottom>
+                    {`Current Total Supply: ${fullTotalSupply} KTY`}
+                </Typography>
+                <Typography align='center' gutterBottom>
+                    {`Total Transcations Considered: ${trxCount} Transactions`}
+                </Typography>
+                <Grid container justifyContent='center'>
+                <Button variant='contained' onClick={handleResultsButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Back To Top</Button>
+                </Grid>
+            </Card>
+        </Grid>
+    )
 
     // A Div for displaying needed information if a user inputs wrong info. This is leftover from the previous AMP calc, not sure if I'll need this app yet.
     const notABscAddress = (
@@ -378,7 +476,11 @@ const ReflectionsCalculator = () => {
             {showResult ?
                 <Fade in={fadeIn}>
                     <div style={{marginTop: '40px'}}>
-                        {result}
+                        {dates.length > 0 ?
+                        dateRangeResult
+                        :
+                        result
+                        }
                     </div>
                 </Fade>
                 :
