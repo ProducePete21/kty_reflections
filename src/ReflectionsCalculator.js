@@ -158,6 +158,7 @@ const ReflectionsCalculator = () => {
         let totalReflections = 0;
         // +1 every loop to assure that my logic is counting the correct number of transactions
         let trxCount = 0;
+        dataTableArray = [];
 
         // iterates through each set of 10000 transactions in order
         allTrx.forEach(trxArray => {
@@ -272,14 +273,12 @@ const ReflectionsCalculator = () => {
         dates = [];
         const [start, end] = dateRange;
         if(end === null) {
-            console.log('It is null yo');
             setFadeIn(false);
             window.scrollTo({top: 0, behavior: 'smooth'});
             start.setHours(12, 0, 0);
             setStartDate(start);
             setEndDate(end);
         } else {
-            console.log('There is an end date');
             start.setHours(0, 0, 0);
             end.setHours(23, 59, 59);
             setDateRangeTimes([start.getTime(), end.getTime()])
@@ -290,7 +289,6 @@ const ReflectionsCalculator = () => {
             setEndDate(end);
             allDates(start, end);
         }
-
     }
 
     const formattedDate = () => {
@@ -356,9 +354,12 @@ const ReflectionsCalculator = () => {
                     columns={columns}
                     data={dataTableArray}
                     striped
+                    pagination
+                    paginationRowsPerPageOptions={[10]}
+                    paginationComponentOptions={{ noRowsPerPage: true }}
                     customStyles={customStyles}
                 />
-                <Typography align='center' gutterBottom>
+                <Typography align='center' gutterBottom style={{paddingTop: '15px'}}>
                     {`Total Received Reflections: ${formatNumber.format(totalReflections)} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
