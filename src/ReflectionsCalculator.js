@@ -21,12 +21,12 @@ const columns = [
     {
         name: 'Date',
         selector: 'date',
-        sortable: true
+        sortable: false
       },
       {
         name: 'Reflections For Day',
         selector: 'reflectionsForDay',
-        sortable: true
+        sortable: false
       },
   ];
 
@@ -433,6 +433,7 @@ const ReflectionsCalculator = () => {
                                     dropdownMode='select'
                                     selectsRange
                                     inline
+                                    disabledKeyboardNavigation
                                 />
                             </Grid>
                             { loadButton ?
