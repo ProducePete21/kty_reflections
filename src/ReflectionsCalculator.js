@@ -77,6 +77,7 @@ const ReflectionsCalculator = () => {
     const [formData, setFormData] = useState(initialState);
     const [trxData, setTrxData] = useState([]);
     const [trxData2, setTrxData2] = useState([]);
+    const [trxData3, setTrxData3] = useState([]);
     const [trxDataLoaded, setTrxDataLoaded] = useState(false);
     const [totalDeadBurns, setTotalDeadBurns] = useState(0);
     const [fullTotalSupply, setFullTotalSupply] = useState(69420000000000);
@@ -119,6 +120,16 @@ const ReflectionsCalculator = () => {
                 .then(data => {
                     setTrxData2(data.result);
 
+                })
+                .catch(error => console.log(error));
+
+            // Third call to API for transactions after 20000
+            await fetch(`https://api.bscscan.com/api?module=account&action=tokentx&contractaddress=0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb&startblock=15683013&endblock=99999999&sort=asc&apikey=${process.env.REACT_APP_BSC_KEY}`)
+                .then(res => res.json())
+                .then(data => {
+                    data.result.shift();
+                    setTrxData3(data.result);
+
                     setTrxDataLoaded(true);
                 })
                 .catch(error => console.log(error));
@@ -150,6 +161,7 @@ const ReflectionsCalculator = () => {
     const calculateReflections = (personalKtyAddress) => {
         allTrx.push(trxData);
         allTrx.push(trxData2);
+        allTrx.push(trxData3);
         let totalSupply = 69420000000000;
         let fullTotalSupply = 69420000000000;
         let ktyAddsAndSubs = 0;
