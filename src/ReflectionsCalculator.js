@@ -83,7 +83,7 @@ const ReflectionsCalculator = () => {
     const [fullTotalSupply, setFullTotalSupply] = useState(69420000000000);
     const [totalReflections, setTotalReflections] = useState(0);
     const [reflectionsForDate, setReflectionsForDate] = useState(0);
-    const [currentTotalKTY, setCurrentTotalKTY] = useState(0);
+    const [currentTotalKTY, setCurrentTotalKTY] = useState();
     const [trxCount, setTrxCount] = useState(0);
     const [maxWidth, setMaxWidth] = useState('800px');
     const [fadeIn, setFadeIn] = useState(false);
@@ -159,6 +159,7 @@ const ReflectionsCalculator = () => {
 
     // main logic for reflections
     const calculateReflections = (personalKtyAddress) => {
+        console.log(dates);
         allTrx.push(trxData);
         allTrx.push(trxData2);
         allTrx.push(trxData3);
@@ -271,7 +272,36 @@ const ReflectionsCalculator = () => {
             setShowDialog(true);
         } else {
             setLoadButton(false);
-            loadData(); 
+            //loadData();
+
+            fetch('http://localhost:4000/reflection/calculate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    personalKtyAddress: formData.personalKtyAddress,
+                    startDate: startDate,
+                    endDate: endDate,
+                    dates: dates,
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                setReflectionsForDate(data.reflectionsForDate);
+                setTotalReflections(data.totalReflections);
+                setCurrentTotalKTY(data.currentTotalKTY);
+                setFullTotalSupply(data.fullTotalSupply);
+                setTrxCount(data.trxCount);
+                dataTableArray = data.dataTableArray;
+
+                window.scrollTo({top: 600, behavior: 'smooth'})
+
+                setShowResult(true);
+                setFadeIn(true);
+            })
+
+            
         } 
         
     }
@@ -343,7 +373,7 @@ const ReflectionsCalculator = () => {
                     {`Total Received Reflections: ${formatNumber.format(totalReflections)} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Current Total KTY Balance: ${formatNumber.format(currentTotalKTY)} KTY`}
+                    {`Current Total KTY Balance: ${currentTotalKTY} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Current Total Supply: ${fullTotalSupply} KTY`}
@@ -375,7 +405,7 @@ const ReflectionsCalculator = () => {
                     {`Total Received Reflections: ${formatNumber.format(totalReflections)} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
-                    {`Current Total KTY Balance: ${formatNumber.format(currentTotalKTY)} KTY`}
+                    {`Current Total KTY Balance: ${currentTotalKTY} KTY`}
                 </Typography>
                 <Typography align='center' gutterBottom>
                     {`Current Total Supply: ${fullTotalSupply} KTY`}
@@ -447,32 +477,16 @@ const ReflectionsCalculator = () => {
                                     inline
                                 />
                             </Grid>
-                            { loadButton ?
-                                <Grid container direction='column' alignItems='center'>
-                                    <Grid item>
-                                        <Typography align='center' style={{marginTop: '20px', fontWeight: 'bold'}}>
-                                            Click button below to load BSC Scan Transaction data:
-                                        </Typography>
-                                    </Grid>
-                                    <Grid item>
-                                        <Button variant='contained' onClick={handleLoadButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Load Trx Data</Button>
-                                    </Grid>
+                            <Grid container direction='column' alignItems='center'>
+                                <Grid item>
+                                    <Typography align='center' style={{marginTop: '20px', fontWeight: 'bold'}}>
+                                        Click button below to show reflections:
+                                    </Typography>
                                 </Grid>
-                            :
-                            trxDataLoaded ?
-                                <div>
-                                    <div style={{borderBottom: 'solid', borderBottomWidth: 'thin', borderRadius: '5px', borderColor: 'rgba(189, 195, 199, 0.9)', backgroundColor: 'rgba(0, 0, 0, 0.08)', marginTop: '20px', paddingBottom: '8px', paddingTop: '10px'}}>
-                                        <Typography align='center'>
-                                            Data loaded
-                                        </Typography>
-                                    </div>
-                                    <Button variant='contained' onClick={handleButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Show Reflections</Button>
-                                </div>
-                                :
-                                <div>
-                                    <Loading />
-                                </div>
-                            }
+                                <Grid item>
+                                    <Button variant='contained' onClick={handleLoadButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Show Reflections</Button>
+                                </Grid>
+                            </Grid>
                             <Typography align='center' style={{paddingTop: '20px', marginTop: '10px'}}>KTY transaction data provided by {<a href='https://bscscan.com/token/0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb' target='_blank' rel="noreferrer noopener">BSC Scan</a>}</Typography>
                         </Grid>
                         </Card>
