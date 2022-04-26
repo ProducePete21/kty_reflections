@@ -154,6 +154,14 @@ const ReflectionsCalculator = () => {
     }
 
     const handleChange = ({target}) => {
+        setLoadButton(true);
+        setFadeIn(false);
+        setReflectionsForDate(0);
+        setTotalReflections(0);
+        setCurrentTotalKTY();
+        setFullTotalSupply(69420000000000);
+        setTrxCount(0);
+        dataTableArray = [];
         setFormData({...formData, [target.name]: target.value})
     }
 
@@ -271,6 +279,7 @@ const ReflectionsCalculator = () => {
             setWarning('Please enter a valid KTY address to load the data');
             setShowDialog(true);
         } else {
+            setTrxDataLoaded(false);
             setLoadButton(false);
             //loadData();
 
@@ -297,10 +306,10 @@ const ReflectionsCalculator = () => {
 
                 window.scrollTo({top: 600, behavior: 'smooth'})
 
+                setTrxDataLoaded(true);
                 setShowResult(true);
                 setFadeIn(true);
             })
-
             
         } 
         
@@ -308,6 +317,7 @@ const ReflectionsCalculator = () => {
 
     const handleResultsButton = () => {
         window.scrollTo({top: 0, behavior: 'smooth'});
+        setLoadButton(true);
         setFadeIn(false);
     }
 
@@ -331,6 +341,7 @@ const ReflectionsCalculator = () => {
             setEndDate(end);
             allDates(start, end);
         }
+        setLoadButton(true);
     }
 
     const formattedDate = () => {
@@ -479,14 +490,39 @@ const ReflectionsCalculator = () => {
                                 />
                             </Grid>
                             <Grid container direction='column' alignItems='center'>
-                                <Grid item>
+                            { loadButton ?
+                                <Grid container direction='column' alignItems='center'>
+                                    <Grid item>
+                                        <Typography align='center' style={{marginTop: '20px', fontWeight: 'bold'}}>
+                                            Click button below to show reflections:
+                                        </Typography>
+                                    </Grid>
+                                    <Grid item>
+                                        <Button variant='contained' onClick={handleLoadButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Show Reflections</Button>
+                                    </Grid>
+                                </Grid>
+                            :
+                            trxDataLoaded ?
+                                <div>
+                                    <div style={{borderBottom: 'solid', borderBottomWidth: 'thin', borderRadius: '5px', borderColor: 'rgba(189, 195, 199, 0.9)', backgroundColor: 'rgba(0, 0, 0, 0.08)', width: '300px', height: '60px',marginTop: '20px', paddingBottom: '8px', paddingTop: '10px'}}>
+                                        <Typography align='center'>
+                                            Data loaded
+                                        </Typography>
+                                    </div>
+                                </div>
+                                :
+                                <div>
+                                    <Loading />
+                                </div>
+                            }
+                                {/* <Grid item>
                                     <Typography align='center' style={{marginTop: '20px', fontWeight: 'bold'}}>
                                         Click button below to show reflections:
                                     </Typography>
                                 </Grid>
                                 <Grid item>
                                     <Button variant='contained' onClick={handleLoadButton} style={{marginTop: '15px', backgroundColor: '#4B3F72'}}>Show Reflections</Button>
-                                </Grid>
+                                </Grid> */}
                             </Grid>
                             <Typography align='center' style={{paddingTop: '20px', marginTop: '10px'}}>KTY transaction data provided by {<a href='https://bscscan.com/token/0x86296279c147bd40cbe5b353f83cea9e9cc9b7bb' target='_blank' rel="noreferrer noopener">BSC Scan</a>}</Typography>
                         </Grid>
