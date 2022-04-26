@@ -274,7 +274,7 @@ const ReflectionsCalculator = () => {
             setLoadButton(false);
             //loadData();
 
-            fetch('http://localhost:4000/reflection/calculate', {
+            fetch('https://kty-backend.herokuapp.com/reflection/calculate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
