@@ -283,7 +283,7 @@ const ReflectionsCalculator = () => {
             setLoadButton(false);
             //loadData();
 
-            fetch('https://kty-backend.herokuapp.com/reflection/calculate', {
+            fetch('http://localhost:4000/reflection/calculate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -309,7 +309,18 @@ const ReflectionsCalculator = () => {
                 setTrxDataLoaded(true);
                 setShowResult(true);
                 setFadeIn(true);
-            })
+            }).catch(() => {
+                setWarning('Cannot retrieve reflections information. Server may be down. Please try again later. Email ktyreflectionsapp@gmail.com if you continue to have this issue.');
+                setShowDialog(true);
+                setLoadButton(true);
+                setFadeIn(false);
+                setReflectionsForDate(0);
+                setTotalReflections(0);
+                setCurrentTotalKTY();
+                setFullTotalSupply(69420000000000);
+                setTrxCount(0);
+                dataTableArray = [];
+            });
             
         } 
         
